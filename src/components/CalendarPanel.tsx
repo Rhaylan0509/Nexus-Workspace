@@ -7,8 +7,10 @@ import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
   GoogleCalendarEvent,
+  GoogleCalendarApiError,
   listGoogleCalendarEvents,
 } from '../lib/googleCalendar';
+import { getGoogleAuthErrorMessage } from '../lib/firebaseAuth';
 
 type CalendarEntry = {
   id: string;
@@ -23,6 +25,7 @@ type CalendarEntry = {
 interface CalendarPanelProps {
   accessToken: string | null;
   onConnectGoogleCalendar: () => Promise<string | null>;
+  onCalendarTokenExpired: () => void;
 }
 
 const STORAGE_KEY = 'nexus_calendar_entries_v1';
@@ -65,7 +68,7 @@ function fromGoogleEvent(event: GoogleCalendarEvent): CalendarEntry | null {
   };
 }
 
-export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onConnectGoogleCalendar }) => {
+export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onConnectGoogleCalendar, onCalendarTokenExpired }) => {
   const [entries, setEntries] = useState<CalendarEntry[]>(readEntries);
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState(() => new Date());
@@ -80,6 +83,20 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const reportCalendarError = (error: unknown, fallback: string) => {
+    if (error instanceof GoogleCalendarApiError && error.status === 401) {
+      onCalendarTokenExpired();
+      setErrorMessage(error.message);
+      return;
+    }
+    const authCode = (error as { code?: string } | null)?.code;
+    if (authCode?.startsWith('auth/')) {
+      setErrorMessage(getGoogleAuthErrorMessage(error));
+      return;
+    }
+    setErrorMessage(error instanceof Error ? error.message : fallback);
+  };
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
@@ -161,7 +178,7 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
       setStatusMessage(`Google Agenda sincronizado · ${remoteEntries.length} compromisso(s) neste mês`);
       window.setTimeout(() => setStatusMessage(''), 4000);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível sincronizar com o Google Agenda.');
+      reportCalendarError(error, 'Não foi possível sincronizar com o Google Agenda.');
     } finally {
       setIsSyncing(false);
     }
@@ -178,7 +195,7 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
     try {
       await onConnectGoogleCalendar();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível conectar ao Google Agenda.');
+      reportCalendarError(error, 'Não foi possível conectar ao Google Agenda.');
     }
   };
 
@@ -210,7 +227,7 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
       setDate(formatInputDate(selectedDay));
       window.setTimeout(() => setStatusMessage(''), 4000);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível adicionar o compromisso.');
+      reportCalendarError(error, 'Não foi possível adicionar o compromisso.');
     } finally {
       setIsSaving(false);
     }
@@ -226,7 +243,7 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
       if (entry.googleEventId && accessToken) await deleteGoogleCalendarEvent(accessToken, entry.googleEventId);
       setEntries((current) => current.filter((item) => item.id !== entry.id && (!entry.googleEventId || item.googleEventId !== entry.googleEventId)));
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível remover o compromisso.');
+      reportCalendarError(error, 'Não foi possível remover o compromisso.');
     }
   };
 
@@ -249,7 +266,7 @@ export const CalendarPanel: React.FC<CalendarPanelProps> = ({ accessToken, onCon
       </div>
       <div className="flex flex-wrap gap-2">
         <button onClick={handleConnect} disabled={isSyncing} title={accessToken ? 'Renovar a autorização do Google Agenda' : undefined} className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100 disabled:opacity-60">
-          <Cloud className="w-4 h-4" />{accessToken ? 'Google Agenda conectado' : 'Conectar Google Agenda'}
+          <Cloud className="w-4 h-4" />{accessToken ? 'Reconectar Google Agenda' : 'Conectar Google Agenda'}
         </button>
         <button onClick={() => accessToken && void syncCalendar(accessToken)} disabled={!accessToken || isSyncing} className="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50">
           {isSyncing ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}{isSyncing ? 'Sincronizando' : 'Sincronizar'}

@@ -56,11 +56,12 @@ import {
   googleCalendarSignIn,
   logout,
   getAccessToken,
-  getGoogleDriveAuthErrorMessage,
+  getGoogleAuthErrorMessage,
 } from './lib/firebaseAuth';
 import {
   syncAllItemsToGoogleDrive,
   getDriveStorageQuota,
+  GoogleDriveApiError,
   DriveStorageQuota,
   deleteFileFromDrive,
   uploadFileToDrive,
@@ -333,9 +334,9 @@ export default function App() {
         setSyncStatusMessage('Google Drive conectado com sucesso!');
         setTimeout(() => setSyncStatusMessage(null), 3000);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao conectar Google Drive:', err);
-      setSyncStatusMessage(getGoogleDriveAuthErrorMessage(err));
+      setSyncStatusMessage(getGoogleAuthErrorMessage(err));
       window.setTimeout(() => setSyncStatusMessage(null), 15000);
     }
   };
@@ -347,6 +348,12 @@ export default function App() {
     setGoogleCalendarToken(result.accessToken);
     setDriveToken(result.accessToken);
     return result.accessToken;
+  };
+
+  const handleCalendarTokenExpired = () => {
+    setGoogleCalendarToken(null);
+    setDriveToken(null);
+    setGoogleUser(null);
   };
 
   const handleDisconnectDrive = async () => {
@@ -385,8 +392,13 @@ export default function App() {
       setTimeout(() => setSyncStatusMessage(null), 3500);
     } catch (err: any) {
       console.error('Erro ao sincronizar com Google Drive:', err);
-      setSyncStatusMessage('Erro ao sincronizar com Google Drive.');
-      setTimeout(() => setSyncStatusMessage(null), 3500);
+      if (err instanceof GoogleDriveApiError && err.status === 401) {
+        setGoogleUser(null);
+        setDriveToken(null);
+        setGoogleCalendarToken(null);
+      }
+      setSyncStatusMessage(err instanceof Error ? err.message : 'Erro ao sincronizar com Google Drive.');
+      window.setTimeout(() => setSyncStatusMessage(null), 15000);
     } finally {
       setIsDriveSyncing(false);
     }
@@ -775,7 +787,11 @@ export default function App() {
         {/* Workspace Main Viewport */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
           <div className={isCalendarView ? 'block' : 'hidden'}>
-            <CalendarPanel accessToken={googleCalendarToken} onConnectGoogleCalendar={handleConnectGoogleCalendar} />
+            <CalendarPanel
+              accessToken={googleCalendarToken}
+              onConnectGoogleCalendar={handleConnectGoogleCalendar}
+              onCalendarTokenExpired={handleCalendarTokenExpired}
+            />
           </div>
           <div className={isCalendarView ? 'hidden' : 'block'}>
           {/* Breadcrumbs Navigation with clickable hierarchy trail */}

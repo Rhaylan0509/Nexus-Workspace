@@ -23,7 +23,7 @@ let isSigningIn = false;
 let cachedAccessToken: string | null = null;
 
 /** Turn Firebase/Google OAuth failures into actionable messages for the user. */
-export function getGoogleDriveAuthErrorMessage(error: unknown): string {
+export function getGoogleAuthErrorMessage(error: unknown): string {
   const authError = error as { code?: string; message?: string };
   const code = authError?.code || '';
   const message = authError?.message || '';
@@ -44,6 +44,10 @@ export function getGoogleDriveAuthErrorMessage(error: unknown): string {
       return 'Não foi possível alcançar o Firebase. Verifique sua conexão, bloqueadores de rede ou VPN e tente novamente.';
     case 'auth/invalid-api-key':
       return 'A chave do Firebase é inválida. Confira a configuração do app web no Firebase Console.';
+    case 'auth/invalid-credential':
+      return 'O Google recusou as credenciais OAuth. Confirme se o provedor Google está habilitado no Firebase e se a tela de consentimento inclui esta conta.';
+    case 'auth/tenant-id-mismatch':
+      return 'O provedor Google está configurado para outro tenant Firebase. Confira a configuração multi-tenant do projeto.';
     default:
       return [code, message].filter(Boolean).join(': ') || 'Erro inesperado na autenticação Google.';
   }

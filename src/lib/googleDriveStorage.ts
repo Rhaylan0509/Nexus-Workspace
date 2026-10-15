@@ -24,6 +24,27 @@ export interface DriveStorageQuota {
 
 const APP_ROOT_FOLDER_NAME = 'Nexus Workspace';
 
+export class GoogleDriveApiError extends Error {
+  constructor(message: string, readonly status: number, readonly reason?: string) {
+    super(message);
+    this.name = 'GoogleDriveApiError';
+  }
+}
+
+async function throwDriveApiError(response: Response, fallback: string): Promise<never> {
+  const payload = await response.json().catch(() => null);
+  const reason = payload?.error?.errors?.[0]?.reason || payload?.error?.status;
+  let message = payload?.error?.message || fallback;
+  if (response.status === 401) {
+    message = 'A autorização do Google Drive expirou. Reconecte sua conta Google e tente novamente.';
+  } else if (response.status === 403 && ['accessNotConfigured', 'SERVICE_DISABLED'].includes(reason)) {
+    message = 'A Google Drive API está desativada no projeto vinculado ao Firebase. Ative-a no Google Cloud Console.';
+  } else if (response.status === 403 && ['insufficientPermissions', 'PERMISSION_DENIED'].includes(reason)) {
+    message = 'O Google Drive não concedeu a permissão drive.file. Desconecte e conecte novamente o Google Drive para autorizar o acesso.';
+  }
+  throw new GoogleDriveApiError(message, response.status, reason);
+}
+
 /**
  * Finds or creates the 'Nexus Workspace' root folder in the user's Google Drive
  */
@@ -36,8 +57,7 @@ export async function ensureAppRootFolder(accessToken: string): Promise<string> 
   });
 
   if (!searchRes.ok) {
-    const errorText = await searchRes.text();
-    throw new Error(`Erro ao buscar pasta no Google Drive: ${errorText}`);
+    return throwDriveApiError(searchRes, 'Erro ao buscar pasta no Google Drive.');
   }
 
   const data = await searchRes.json();
@@ -60,7 +80,7 @@ export async function ensureAppRootFolder(accessToken: string): Promise<string> 
   });
 
   if (!createRes.ok) {
-    throw new Error('Falha ao criar pasta Nexus Workspace no Google Drive');
+    return throwDriveApiError(createRes, 'Falha ao criar pasta Nexus Workspace no Google Drive.');
   }
 
   const folder = await createRes.json();
@@ -89,7 +109,7 @@ export async function createDriveFolder(
   });
 
   if (!res.ok) {
-    throw new Error(`Falha ao criar pasta "${name}" no Drive`);
+    return throwDriveApiError(res, `Falha ao criar pasta "${name}" no Drive.`);
   }
 
   return await res.json();
@@ -148,8 +168,7 @@ export async function uploadFileToDrive(
   );
 
   if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Falha no envio do arquivo para o Google Drive: ${errorText}`);
+    return throwDriveApiError(res, 'Falha no envio do arquivo para o Google Drive.');
   }
 
   return await res.json();
@@ -161,8 +180,7 @@ export async function downloadFileFromDrive(accessToken: string, fileId: string)
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`Falha ao baixar a versão atual do Google Drive: ${message}`);
+    return throwDriveApiError(response, 'Falha ao baixar a versão atual do Google Drive.');
   }
   return response.blob();
 }
@@ -177,7 +195,7 @@ export async function deleteFileFromDrive(accessToken: string, fileId: string): 
   });
 
   if (!res.ok && res.status !== 404) {
-    throw new Error('Falha ao excluir item do Google Drive');
+    return throwDriveApiError(res, 'Falha ao excluir item do Google Drive.');
   }
 }
 

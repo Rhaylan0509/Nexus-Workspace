@@ -1,5 +1,12 @@
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
 
+export class GoogleCalendarApiError extends Error {
+  constructor(message: string, readonly status: number, readonly reason?: string) {
+    super(message);
+    this.name = 'GoogleCalendarApiError';
+  }
+}
+
 export interface GoogleCalendarEvent {
   id: string;
   summary?: string;
@@ -20,8 +27,16 @@ async function calendarRequest<T>(token: string, url: string, init?: RequestInit
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
-    const message = payload?.error?.message || `Google Agenda respondeu com erro ${response.status}.`;
-    throw new Error(response.status === 401 ? 'A autorização do Google Agenda expirou. Conecte a conta novamente.' : message);
+    const reason = payload?.error?.errors?.[0]?.reason || payload?.error?.status;
+    let message = payload?.error?.message || `Google Agenda respondeu com erro ${response.status}.`;
+    if (response.status === 401) {
+      message = 'A autorização do Google Agenda expirou. Conecte a conta novamente.';
+    } else if (response.status === 403 && ['accessNotConfigured', 'SERVICE_DISABLED'].includes(reason)) {
+      message = 'A Google Calendar API está desativada no projeto Google Cloud vinculado ao Firebase. Ative-a e tente novamente.';
+    } else if (response.status === 403 && ['insufficientPermissions', 'PERMISSION_DENIED'].includes(reason)) {
+      message = 'O Google não concedeu acesso ao calendário. Autorize o escopo calendar.events.owned na tela de consentimento OAuth e tente conectar novamente.';
+    }
+    throw new GoogleCalendarApiError(message, response.status, reason);
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
