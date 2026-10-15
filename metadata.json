@@ -1,0 +1,6 @@
+{
+  "name": "Nexus Hub - Explorador & Produtividade",
+  "description": "Central de produtividade com explorador de arquivos, cadernos, projetos, notas e suporte a PDF e anotações Xournal++.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
