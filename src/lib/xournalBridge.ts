@@ -8,6 +8,10 @@ export interface XournalBridgeJob {
   error?: string | null;
 }
 
+export interface XournalBridgeStatus {
+  online: boolean;
+}
+
 async function bridgeRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const idToken = await getFirebaseIdToken();
   if (!idToken) throw new Error('Entre no Nexus antes de abrir a nota no Xournal++.');
@@ -39,6 +43,19 @@ export function createXournalBridgeJob(input: { itemId: string; fileName: string
     method: 'POST',
     body: JSON.stringify(input),
   });
+}
+
+export function getXournalBridgeStatus() {
+  return bridgeRequest<XournalBridgeStatus>('/status');
+}
+
+export function requestLocalXournalBridge() {
+  const link = document.createElement('a');
+  link.href = 'nexusworkspace://open';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 export function uploadXournalBridgeInput(jobId: string, file: Blob) {

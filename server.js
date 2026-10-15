@@ -18,8 +18,10 @@ const bridgeDataDir = path.isAbsolute(configuredBridgeDataDir)
 const bridgeStateFile = path.join(bridgeDataDir, 'xournal-jobs.json');
 const bridgeFilesDir = path.join(bridgeDataDir, 'xournal-files');
 const bridgeLeaseMs = 90_000;
+const bridgeOnlineWindowMs = 15_000;
 const firebaseJwksUrl = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 let firebaseJwksCache = { keys: [], expiresAt: 0 };
+let lastBridgePollAt = 0;
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '64kb' }));
@@ -136,6 +138,10 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'nexus-workspace', timestamp: new Date().toISOString() });
 });
 
+app.get('/api/bridge/status', requireFirebaseUser, (_req, res) => {
+  res.json({ online: Date.now() - lastBridgePollAt < bridgeOnlineWindowMs });
+});
+
 app.post('/api/bridge/jobs', requireFirebaseUser, (req, res) => {
   const { itemId, fileName } = req.body || {};
   if (!itemId || !/\.(xopp|xoj)$/i.test(fileName || '')) {
@@ -187,6 +193,7 @@ app.put('/api/bridge/jobs/:jobId/input', requireFirebaseUser, express.raw({ type
 });
 
 app.get('/api/bridge/next', requireBridgeToken, (req, res) => {
+  lastBridgePollAt = Date.now();
   const jobs = loadBridgeJobs();
   const now = Date.now();
   const job = jobs.find((entry) => entry.status === 'queued' || (entry.status === 'processing' && entry.leaseUntil < now));

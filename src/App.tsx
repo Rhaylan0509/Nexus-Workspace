@@ -39,6 +39,8 @@ import {
   deleteXournalBridgeJob,
   getXournalBridgeJob,
   getXournalBridgeResult,
+  getXournalBridgeStatus,
+  requestLocalXournalBridge,
   uploadXournalBridgeInput,
   wait,
 } from './lib/xournalBridge';
@@ -416,16 +418,40 @@ export default function App() {
     if (!detectClientOS().isWindows) {
       throw new Error('A edição pela bridge só está disponível no Windows.');
     }
+    if (!item.driveFileId) {
+      throw new Error('Esta nota ainda não tem uma cópia no Google Drive. Use “Sincronizar com Drive” e tente novamente.');
+    }
+    const shouldRunBridge = window.confirm(
+      `Executar a bridge do Nexus para abrir “${item.name}” no Xournal++? O navegador também poderá pedir autorização para abrir o aplicativo local.`,
+    );
+    if (!shouldRunBridge) {
+      onStatus('Abertura cancelada.');
+      return;
+    }
+    onStatus('Solicitando autorização para abrir a bridge local…');
+    requestLocalXournalBridge();
     const token = driveToken || await getAccessToken();
     if (!token) {
       throw new Error('Conecte o Google Drive e sincronize a nota antes de abrir no Xournal++.');
     }
-    if (!item.driveFileId) {
-      throw new Error('Esta nota ainda não tem uma cópia no Google Drive. Use “Sincronizar com Drive” e tente novamente.');
+    onStatus('Aguardando a bridge local iniciar…');
+    let bridgeOnline = false;
+    const startupDeadline = Date.now() + 45_000;
+    while (Date.now() < startupDeadline) {
+      const bridgeStatus = await getXournalBridgeStatus();
+      if (bridgeStatus.online) {
+        bridgeOnline = true;
+        break;
+      }
+      await wait(2000);
+    }
+    if (!bridgeOnline) {
+      throw new Error('A bridge não iniciou. No Windows, configure-a uma vez executando bridge/install-protocol.ps1 e permita que o navegador abra o aplicativo local.');
     }
 
-    onStatus('Baixando a nota do Google Drive…');
-    const sourceBlob = await downloadFileFromDrive(token, item.driveFileId);
+    onStatus('Preparando a nota para edição…');
+    const localSourceBlob = item.blobKey ? await getBlob(item.blobKey) : null;
+    const sourceBlob = localSourceBlob || await downloadFileFromDrive(token, item.driveFileId);
     onStatus('Enviando a nota para a bridge Windows…');
     const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name });
     try {

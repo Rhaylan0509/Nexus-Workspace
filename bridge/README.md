@@ -1,33 +1,43 @@
 # Bridge local do Xournal++
 
-A bridge roda no Windows, consulta a fila do Nexus no Render, baixa a nota enviada pelo navegador, abre o Xournal++ e devolve o arquivo editado ao Nexus. O navegador usa a autorização Google Drive já conectada ao app para baixar e atualizar a nota. A bridge não precisa de cliente OAuth, `credentials.json`, `token.json` nem acesso próprio ao Google Drive.
+A bridge conecta o Nexus Workspace hospedado no Render ao Xournal++ instalado no Windows. Ela só inicia quando você clica em **Abrir no Xournal++**. O navegador pede autorização para abrir o protocolo local `nexusworkspace://`; depois que você fecha o Xournal++, a bridge envia a nota de volta, apaga a pasta temporária da edição e encerra.
+
+O site não consegue instalar ou executar um programa Python silenciosamente. Por isso, a associação do protocolo é instalada uma vez no perfil atual do Windows. Não é necessário iniciar a bridge junto com o Windows.
 
 ## Requisitos
 
 - Windows 10/11, Python 3.10 ou mais recente e Xournal++ instalado.
-- O Nexus precisa estar implantado no Render com um disco persistente montado em `/var/data` e `BRIDGE_DATA_DIR=/var/data`.
-- O `BRIDGE_API_TOKEN` no Render deve ser igual ao da bridge local. Esse token é usado somente entre o serviço Render e a bridge Windows.
+- O serviço Nexus no Render precisa ter um disco persistente montado em `/var/data` e `BRIDGE_DATA_DIR=/var/data`.
+- `BRIDGE_API_TOKEN` no Render e em `bridge/.env` devem ter o mesmo valor.
 
-## Preparação no Windows
+## Configuração única no Windows
 
-1. Copie `bridge/.env.example` para `bridge/.env`.
-2. Defina `NEXUS_BRIDGE_URL` com o endereço do seu site e use o mesmo `BRIDGE_API_TOKEN` configurado no Render.
-3. Se o Xournal++ não estiver em um caminho padrão ou no PATH, defina `XOURNALPP_EXE` com o caminho do executável.
-4. No PowerShell, dentro da pasta `bridge`, instale e inicie:
+1. Baixe/clonar o projeto e abra o PowerShell na pasta `bridge`.
+2. Copie `.env.example` para `.env`; configure o endereço do Render e o mesmo `BRIDGE_API_TOKEN` definido nas variáveis do serviço no Render. Mantenha esse token privado.
+3. Se o Xournal++ estiver instalado em um caminho fora dos locais padrão, defina `XOURNALPP_EXE` em `.env`.
+4. Instale as dependências e registre o protocolo para seu usuário:
 
    ```powershell
    py -m pip install -r requirements.txt
-   py bridge.py
+   Set-ExecutionPolicy -Scope Process Bypass
+   .\install-protocol.ps1
    ```
 
-5. Conecte o Google Drive no Nexus, sincronize a nota e clique em **Editar no Xournal++**. Mantenha o site aberto até a atualização da nota no Drive terminar.
+   O registro fica em `HKEY_CURRENT_USER`, portanto não pede privilégio de administrador. Para desfazer, execute `uninstall-protocol.ps1` na mesma pasta.
 
-Feche as outras janelas do Xournal++ antes de iniciar a edição pelo Nexus. A bridge usa uma subpasta própria dentro de `C:\TempXournal` e remove os arquivos temporários depois que o Xournal++ fecha.
+## Uso
+
+1. No Nexus, conecte o Google Drive e sincronize a nota `.xopp` ou `.xoj`.
+2. Clique em **Abrir no Xournal++** e aceite a solicitação do navegador para abrir o aplicativo local.
+3. Edite e salve a nota no Xournal++. Feche o programa para a bridge devolver a versão atualizada ao Drive.
+4. O processo da bridge termina sozinho. Os arquivos temporários da nota são apagados de `C:\TempXournal`.
+
+Feche todas as janelas do Xournal++ antes de iniciar a edição pelo Nexus. Se o navegador não mostrar a solicitação ou o botão informar que a bridge não iniciou, confirme a configuração acima e tente novamente.
 
 ## Fluxo de dados
 
-1. O site baixa a nota do Drive usando a autorização Google já existente no navegador.
-2. O site envia o arquivo à fila protegida do Nexus.
-3. A bridge Windows baixa o arquivo da fila e abre o Xournal++.
-4. Ao fechar o Xournal++, a bridge devolve o arquivo editado ao Nexus.
-5. O site atualiza o mesmo arquivo no Google Drive e limpa o resultado temporário do servidor.
+1. O site baixa a nota do Drive usando a autorização Google já conectada no navegador.
+2. O site envia a nota para a fila protegida do Nexus.
+3. O navegador abre a bridge local após sua autorização; a bridge baixa a nota e inicia o Xournal++.
+4. Ao fechar o Xournal++, a bridge devolve a nota editada e remove a cópia temporária local.
+5. O site atualiza o mesmo arquivo no Google Drive e remove o resultado temporário no servidor.
