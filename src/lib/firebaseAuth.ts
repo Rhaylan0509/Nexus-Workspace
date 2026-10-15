@@ -22,6 +22,33 @@ SCOPES.forEach((scope) => provider.addScope(scope));
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
 
+/** Turn Firebase/Google OAuth failures into actionable messages for the user. */
+export function getGoogleDriveAuthErrorMessage(error: unknown): string {
+  const authError = error as { code?: string; message?: string };
+  const code = authError?.code || '';
+  const message = authError?.message || '';
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'este domínio';
+
+  switch (code) {
+    case 'auth/unauthorized-domain':
+      return `O Firebase não autorizou o domínio ${hostname}. No Firebase Console, abra Authentication → Settings → Authorized domains e adicione ${hostname} (sem https://).`;
+    case 'auth/operation-not-allowed':
+      return 'O login com Google está desativado. Ative o provedor Google em Firebase Console → Authentication → Sign-in method.';
+    case 'auth/popup-blocked':
+      return 'O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente novamente.';
+    case 'auth/popup-closed-by-user':
+      return 'A janela de autenticação foi fechada antes da conclusão. Tente novamente e conclua o acesso ao Google.';
+    case 'auth/cancelled-popup-request':
+      return 'Já existe uma autenticação Google em andamento. Termine ou feche a outra janela antes de tentar novamente.';
+    case 'auth/network-request-failed':
+      return 'Não foi possível alcançar o Firebase. Verifique sua conexão, bloqueadores de rede ou VPN e tente novamente.';
+    case 'auth/invalid-api-key':
+      return 'A chave do Firebase é inválida. Confira a configuração do app web no Firebase Console.';
+    default:
+      return [code, message].filter(Boolean).join(': ') || 'Erro inesperado na autenticação Google.';
+  }
+}
+
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
   onAuthFailure?: () => void

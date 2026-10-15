@@ -1,5 +1,17 @@
 # Google Agenda no Nexus Workspace
 
+## Autorizar o Google Drive no Render
+
+O login do Drive usa Firebase Authentication. Se o app mostrar `auth/unauthorized-domain`, o domínio precisa ser autorizado no projeto Firebase; essa permissão não pode ser concedida pelo código do frontend.
+
+1. No Firebase Console, abra o projeto `omega-surge-hsmzh` e vá a **Authentication → Settings → Authorized domains**.
+2. Adicione o host do Render sem protocolo nem caminho: `nexus-workspace-92zg.onrender.com`.
+3. Em **Authentication → Sign-in method**, confirme que o provedor **Google** está ativado.
+4. No Google Cloud Console do mesmo projeto, habilite **Google Drive API** e, se a tela de consentimento OAuth estiver em modo de teste, adicione a conta que fará o login como usuário de teste.
+5. Recarregue o app publicado e tente conectar de novo. A alteração de domínio no Firebase normalmente não exige novo deploy.
+
+O app agora exibe o código/cause de erros OAuth conhecidos e orienta sobre o domínio bloqueado, provedor desligado, popup e falha de rede.
+
 O calendário usa o OAuth do Firebase Authentication e chama a API Google Calendar diretamente no navegador. A autorização solicita `calendar.events.owned` para consultar, criar e remover eventos em calendários pertencentes à conta, além de `drive.file` para manter o acesso ao Drive existente.
 
 ## Configuração para testar
