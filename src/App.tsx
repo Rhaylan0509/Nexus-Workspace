@@ -33,6 +33,8 @@ import {
 } from './types';
 import { INITIAL_FILES, INITIAL_QUICK_LINKS } from './data/initialData';
 import { getBlob, triggerFileDownload, saveBlob } from './lib/storage';
+import { detectClientOS } from './lib/osDetector';
+import { createXournalBridgeJob, getXournalBridgeJob, wait } from './lib/xournalBridge';
 import { TopNav } from './components/TopNav';
 import { Sidebar } from './components/Sidebar';
 import { Breadcrumbs } from './components/Breadcrumbs';
@@ -46,10 +48,12 @@ import { RenameModal } from './components/RenameModal';
 import { MoveItemModal } from './components/MoveItemModal';
 import { ProductivityHubDrawer } from './components/ProductivityHubDrawer';
 import { ConfirmModal } from './components/ConfirmModal';
+import { CalendarPanel } from './components/CalendarPanel';
 import { User } from 'firebase/auth';
 import {
   initAuth,
   googleSignIn,
+  googleCalendarSignIn,
   logout,
   getAccessToken,
 } from './lib/firebaseAuth';
@@ -59,6 +63,7 @@ import {
   DriveStorageQuota,
   deleteFileFromDrive,
   uploadFileToDrive,
+  downloadFileFromDrive,
 } from './lib/googleDriveStorage';
 
 const STORAGE_KEY_ITEMS = 'nexus_workspace_items_zero_v1';
@@ -171,6 +176,8 @@ export default function App() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isProductivityDrawerOpen, setIsProductivityDrawerOpen] = useState(false);
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false);
+  const [isCalendarView, setIsCalendarView] = useState(false);
+  const [googleCalendarToken, setGoogleCalendarToken] = useState<string | null>(null);
   const [confirmModalState, setConfirmModalState] = useState<{
     isOpen: boolean;
     title: string;
@@ -291,6 +298,7 @@ export default function App() {
 
   // Handlers for Navigation
   const handleNavigateToFolder = (folderId: string | null) => {
+    setIsCalendarView(false);
     setCurrentCategory('all');
     setCurrentFolderId(folderId);
     setSearchQuery('');
@@ -305,6 +313,7 @@ export default function App() {
   };
 
   const handleSelectCategory = (category: FilterCategory) => {
+    setIsCalendarView(false);
     setCurrentCategory(category);
     if (category !== 'all') {
       setCurrentFolderId(null);
@@ -329,10 +338,20 @@ export default function App() {
     }
   };
 
+  const handleConnectGoogleCalendar = async (): Promise<string | null> => {
+    const result = await googleCalendarSignIn();
+    if (!result) return null;
+    setGoogleUser(result.user);
+    setGoogleCalendarToken(result.accessToken);
+    setDriveToken(result.accessToken);
+    return result.accessToken;
+  };
+
   const handleDisconnectDrive = async () => {
     await logout();
     setGoogleUser(null);
     setDriveToken(null);
+    setGoogleCalendarToken(null);
     setDriveQuota(null);
   };
 
@@ -347,9 +366,12 @@ export default function App() {
     setSyncStatusMessage('Iniciando sincronização com Google Drive...');
 
     try {
-      await syncAllItemsToGoogleDrive(token, items, (curr, tot, name) => {
+      const driveIds = await syncAllItemsToGoogleDrive(token, items, (curr, tot, name) => {
         setSyncStatusMessage(`Sincronizando ${curr}/${tot}: ${name}`);
       });
+      setItems((current) => current.map((item) => driveIds[item.id]
+        ? { ...item, driveFileId: driveIds[item.id], updatedAt: Date.now() }
+        : item));
 
       const now = Date.now();
       setLastSyncTime(now);
@@ -366,6 +388,43 @@ export default function App() {
     } finally {
       setIsDriveSyncing(false);
     }
+  };
+
+  const handleOpenXournal = async (item: FileItem, onStatus: (status: string) => void) => {
+    if (!detectClientOS().isWindows) {
+      throw new Error('A edição pela bridge só está disponível no Windows.');
+    }
+    const token = driveToken || await getAccessToken();
+    if (!token) {
+      throw new Error('Conecte o Google Drive e sincronize a nota antes de abrir no Xournal++.');
+    }
+    if (!item.driveFileId) {
+      throw new Error('Esta nota ainda não tem uma cópia no Google Drive. Use “Sincronizar com Drive” e tente novamente.');
+    }
+
+    onStatus('Enviando pedido para a bridge Windows…');
+    const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name, driveFileId: item.driveFileId });
+    onStatus('Pedido enviado. Aguardando a bridge Windows…');
+
+    while (true) {
+      await wait(3000);
+      const current = await getXournalBridgeJob(job.id);
+      if (current.status === 'failed') throw new Error(current.error || 'A bridge não conseguiu concluir a edição.');
+      if (current.status === 'completed') break;
+      onStatus(current.status === 'processing'
+        ? 'Xournal++ aberto. O arquivo será sincronizado quando você fechar o programa…'
+        : 'Aguardando a bridge Windows…');
+    }
+
+    onStatus('Baixando a versão sincronizada do Google Drive…');
+    const updatedBlob = await downloadFileFromDrive(token, item.driveFileId);
+    const blobKey = item.blobKey || `blob_${item.id}`;
+    await saveBlob(blobKey, updatedBlob);
+    const updatedItem = { ...item, blobKey, size: updatedBlob.size, updatedAt: Date.now() };
+    setItems((current) => current.map((currentItem) => currentItem.id === item.id ? updatedItem : currentItem));
+    setPreviewItem((current) => current?.id === item.id ? updatedItem : current);
+    onStatus('Edição sincronizada com o Google Drive.');
+    window.setTimeout(() => onStatus(''), 5000);
   };
 
   const handleResetWorkspace = () => {
@@ -696,6 +755,8 @@ export default function App() {
           currentFolderId={currentFolderId}
           onSelectCategory={handleSelectCategory}
           onNavigateToFolder={handleNavigateToFolder}
+          onOpenCalendar={() => setIsCalendarView(true)}
+          isCalendarView={isCalendarView}
           onOpenProductivityDrawer={() => setIsProductivityDrawerOpen(true)}
           isOpenMobile={isSidebarMobileOpen}
           onCloseMobile={() => setIsSidebarMobileOpen(false)}
@@ -711,6 +772,10 @@ export default function App() {
 
         {/* Workspace Main Viewport */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+          <div className={isCalendarView ? 'block' : 'hidden'}>
+            <CalendarPanel accessToken={googleCalendarToken} onConnectGoogleCalendar={handleConnectGoogleCalendar} />
+          </div>
+          <div className={isCalendarView ? 'hidden' : 'block'}>
           {/* Breadcrumbs Navigation with clickable hierarchy trail */}
           <Breadcrumbs
             breadcrumbs={breadcrumbs}
@@ -958,6 +1023,7 @@ export default function App() {
               />
             )}
           </div>
+          </div>
         </main>
       </div>
 
@@ -985,6 +1051,7 @@ export default function App() {
           }}
           onDeleteItem={handleDeleteItem}
           onRenameItem={(item) => setEditingItem(item)}
+          onOpenXournal={handleOpenXournal}
         />
       )}
 

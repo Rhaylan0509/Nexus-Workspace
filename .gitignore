@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+.local-data/
+bridge/.env
+bridge/credentials.json
+bridge/token.json
+bridge/.venv/
+bridge/__pycache__/

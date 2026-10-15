@@ -60,6 +60,29 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
   }
 };
 
+/** Requests a separate Google consent grant for Calendar event access. */
+export const googleCalendarSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
+  try {
+    isSigningIn = true;
+    const calendarProvider = new GoogleAuthProvider();
+    calendarProvider.addScope('https://www.googleapis.com/auth/drive.file');
+    calendarProvider.addScope('https://www.googleapis.com/auth/calendar.events.owned');
+    calendarProvider.setCustomParameters({ prompt: 'consent' });
+    const result = await signInWithPopup(auth, calendarProvider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (!credential?.accessToken) {
+      throw new Error('Não foi possível obter autorização para o Google Agenda.');
+    }
+    cachedAccessToken = credential.accessToken;
+    return { user: result.user, accessToken: credential.accessToken };
+  } catch (error) {
+    console.error('Google Calendar authorization error:', error);
+    throw error;
+  } finally {
+    isSigningIn = false;
+  }
+};
+
 export const getAccessToken = async (): Promise<string | null> => {
   return cachedAccessToken;
 };

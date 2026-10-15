@@ -155,6 +155,18 @@ export async function uploadFileToDrive(
   return await res.json();
 }
 
+/** Downloads the latest binary contents of an existing Drive file. */
+export async function downloadFileFromDrive(accessToken: string, fileId: string): Promise<Blob> {
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Falha ao baixar a versão atual do Google Drive: ${message}`);
+  }
+  return response.blob();
+}
+
 /**
  * Deletes a file or folder from Google Drive
  */

@@ -156,6 +156,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const textLayerRef = useRef<HTMLDivElement | null>(null);
   const renderTaskRef = useRef<any>(null);
   const pdfDocRef = useRef<any>(null);
 
@@ -328,6 +329,37 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     };
   }, [currentPage, scale, rotation]);
 
+  // PDF.js text layer makes the rendered page selectable while keeping the
+  // canvas as the visual source. Highlight rectangles are stored as page percentages.
+  useEffect(() => {
+    let cancelled = false;
+    let textLayerTask: any = null;
+    const container = textLayerRef.current;
+    const doc = pdfDocRef.current;
+    if (!container || !doc || !pageDimensions.width) return;
+    container.replaceChildren();
+    (async () => {
+      try {
+        const page = await doc.getPage(currentPage);
+        if (cancelled) return;
+        const viewport = page.getViewport({ scale, rotation });
+        const textContent = await page.getTextContent();
+        if (cancelled) return;
+        const TextLayer = (pdfjsLib as any).TextLayer;
+        if (!TextLayer) return;
+        textLayerTask = new TextLayer({ textContentSource: textContent, container, viewport });
+        await textLayerTask.render();
+      } catch (error) {
+        if (!cancelled) console.warn('PDF text selection layer could not be rendered:', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      try { textLayerTask?.cancel?.(); } catch { /* ignore */ }
+      container.replaceChildren();
+    };
+  }, [currentPage, scale, rotation, pageDimensions.width]);
+
   const handlePrevPage = () => {
     if (currentPage > 1) {
       const nextP = currentPage - 1;
@@ -425,6 +457,32 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   };
 
   const handleMouseUp = () => {
+    if (activeTool === 'select') {
+      const selection = window.getSelection();
+      const selectedText = selection?.toString().trim();
+      const overlay = overlayRef.current;
+      if (selectedText && selection && overlay) {
+        const bounds = overlay.getBoundingClientRect();
+        const highlights = Array.from(selection.getRangeAt(0).getClientRects())
+          .filter((rect) => rect.width > 1 && rect.height > 1)
+          .map((rect): PdfHighlight => ({
+            id: `hl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+            pageNumber: currentPage,
+            x: Math.max(0, ((rect.left - bounds.left) / bounds.width) * 100),
+            y: Math.max(0, ((rect.top - bounds.top) / bounds.height) * 100),
+            width: Math.min(100, (rect.width / bounds.width) * 100),
+            height: Math.min(100, (rect.height / bounds.height) * 100),
+            color: '#facc15',
+            text: selectedText,
+            createdAt: Date.now(),
+          }));
+        if (highlights.length) {
+          saveAnnotationsToStateAndStorage({ ...annotations, highlights: [...annotations.highlights, ...highlights] });
+        }
+        selection.removeAllRanges();
+      }
+      return;
+    }
     if (!isDrawing) return;
     setIsDrawing(false);
 
@@ -624,7 +682,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   });
 
   return (
-    <div className="w-full h-full flex flex-col bg-neutral-900/5 select-none overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-neutral-900/5 overflow-hidden">
       {/* COMPACT SINGLE-ROW TOOLBAR (Leaves maximum vertical space for the document) */}
       <div className="bg-neutral-850 text-white flex items-center justify-between gap-1.5 px-3 py-1.5 text-xs shrink-0 shadow-sm border-b border-neutral-700/80 bg-neutral-900 overflow-x-auto min-h-[42px]">
         {/* Left: Navigation and Sidebar */}
@@ -725,7 +783,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                 ? 'bg-neutral-700 text-white font-medium shadow-xs'
                 : 'text-neutral-400 hover:text-white'
             }`}
-            title="Modo Leitura"
+            title="Selecione um trecho do texto do PDF para destacá-lo em amarelo"
           >
             Leitura
           </button>
@@ -1079,6 +1137,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                     : 'cursor-default'
                 }`}
               >
+                <div ref={textLayerRef} className="pdf-text-layer" aria-label="Texto do PDF selecionável" />
                 {/* 1. SVG Drawings Layer */}
                 <svg
                   className="w-full h-full absolute inset-0 pointer-events-none"

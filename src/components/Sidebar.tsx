@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   RefreshCw,
   LogOut,
+  CalendarDays,
 } from 'lucide-react';
 import { FileItem, FilterCategory } from '../types';
 import { formatBytes } from '../lib/storage';
@@ -21,6 +22,8 @@ interface SidebarProps {
   currentFolderId: string | null;
   onSelectCategory: (category: FilterCategory) => void;
   onNavigateToFolder: (folderId: string | null) => void;
+  onOpenCalendar: () => void;
+  isCalendarView: boolean;
   onOpenProductivityDrawer: () => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
@@ -41,6 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentFolderId,
   onSelectCategory,
   onNavigateToFolder,
+  onOpenCalendar,
+  isCalendarView,
   onOpenProductivityDrawer,
   isOpenMobile,
   onCloseMobile,
@@ -157,6 +162,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="text-[11px] font-mono tabular-nums text-neutral-400">
               {trashedItems.length}
             </span>
+          </button>
+
+          <button
+            onClick={() => {
+              onOpenCalendar();
+              if (isOpenMobile) onCloseMobile();
+            }}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${isCalendarView ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'}`}
+          >
+            <CalendarDays className={`w-4 h-4 ${isCalendarView ? 'text-blue-200' : 'text-blue-600'}`} />
+            <span>Calendário</span>
           </button>
         </div>
 
