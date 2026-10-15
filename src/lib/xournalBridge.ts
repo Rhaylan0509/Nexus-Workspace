@@ -1,57 +1,73 @@
+import { getFirebaseIdToken } from './firebaseAuth';
+
 export interface XournalBridgeJob {
   id: string;
   itemId: string;
   fileName: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed';
+  status: 'uploading' | 'queued' | 'processing' | 'completed' | 'failed';
   error?: string | null;
 }
 
-const BRIDGE_SECRET_KEY = 'nexus_xournal_bridge_token_v1';
-
-function getBridgeToken(): string {
-  let token = localStorage.getItem(BRIDGE_SECRET_KEY)?.trim() || '';
-  if (!token) {
-    token = window.prompt(
-      'Digite o mesmo BRIDGE_API_TOKEN configurado no servidor e no .env da bridge Windows:'
-    )?.trim() || '';
-    if (!token) throw new Error('A edição foi cancelada: falta o token de pareamento da bridge.');
-    localStorage.setItem(BRIDGE_SECRET_KEY, token);
-  }
-  return token;
-}
-
 async function bridgeRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const idToken = await getFirebaseIdToken();
+  if (!idToken) throw new Error('Entre no Nexus antes de abrir a nota no Xournal++.');
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${idToken}`);
+  if (typeof init.body === 'string' && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   const response = await fetch(`/api/bridge${path}`, {
     ...init,
-    headers: {
-      'X-Bridge-Token': getBridgeToken(),
-      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
-      ...init.headers,
-    },
+    headers,
   });
+  if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
     if (response.status === 503) {
-      throw new Error('O servidor ainda não está configurado para a bridge. Defina BRIDGE_API_TOKEN e BRIDGE_DATA_DIR.');
+      throw new Error(payload?.error || 'O servidor ainda não está configurado para a bridge.');
     }
     if (response.status === 401) {
-      localStorage.removeItem(BRIDGE_SECRET_KEY);
-      throw new Error('Token de pareamento inválido. Tente novamente para informar o token correto.');
+      throw new Error(payload?.error || 'Entre novamente no Nexus e tente outra vez.');
     }
     throw new Error(payload?.error || `Falha de comunicação com a bridge (${response.status}).`);
   }
   return payload as T;
 }
 
-export function createXournalBridgeJob(input: { itemId: string; fileName: string; driveFileId: string }) {
+export function createXournalBridgeJob(input: { itemId: string; fileName: string }) {
   return bridgeRequest<XournalBridgeJob>('/jobs', {
     method: 'POST',
     body: JSON.stringify(input),
   });
 }
 
+export function uploadXournalBridgeInput(jobId: string, file: Blob) {
+  return bridgeRequest<void>(`/jobs/${encodeURIComponent(jobId)}/input`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: file,
+  });
+}
+
 export function getXournalBridgeJob(jobId: string) {
   return bridgeRequest<XournalBridgeJob>(`/jobs/${encodeURIComponent(jobId)}`);
+}
+
+export async function getXournalBridgeResult(jobId: string): Promise<Blob> {
+  const idToken = await getFirebaseIdToken();
+  if (!idToken) throw new Error('Entre no Nexus antes de baixar o arquivo editado.');
+  const response = await fetch(`/api/bridge/jobs/${encodeURIComponent(jobId)}/result`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.error || `Falha ao baixar o resultado da bridge (${response.status}).`);
+  }
+  return response.blob();
+}
+
+export function deleteXournalBridgeJob(jobId: string) {
+  return bridgeRequest<void>(`/jobs/${encodeURIComponent(jobId)}`, { method: 'DELETE' });
 }
 
 export const wait = (milliseconds: number) => new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));

@@ -185,6 +185,30 @@ export async function downloadFileFromDrive(accessToken: string, fileId: string)
   return response.blob();
 }
 
+/** Replaces the binary contents of an existing file in Google Drive. */
+export async function updateDriveFile(
+  accessToken: string,
+  fileId: string,
+  contentBlob: Blob,
+  mimeType: string = 'application/octet-stream'
+): Promise<void> {
+  const response = await fetch(
+    `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': mimeType,
+      },
+      body: contentBlob,
+    }
+  );
+
+  if (!response.ok) {
+    return throwDriveApiError(response, 'Falha ao atualizar o arquivo editado no Google Drive.');
+  }
+}
+
 /**
  * Deletes a file or folder from Google Drive
  */

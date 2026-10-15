@@ -118,6 +118,12 @@ export const getAccessToken = async (): Promise<string | null> => {
   return cachedAccessToken;
 };
 
+/** Returns a Firebase session token for authenticated app-server requests. */
+export const getFirebaseIdToken = async (): Promise<string | null> => {
+  const user = auth.currentUser;
+  return user ? user.getIdToken() : null;
+};
+
 export const logout = async () => {
   await signOut(auth);
   cachedAccessToken = null;

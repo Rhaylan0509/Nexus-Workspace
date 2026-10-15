@@ -34,7 +34,14 @@ import {
 import { INITIAL_FILES, INITIAL_QUICK_LINKS } from './data/initialData';
 import { getBlob, triggerFileDownload, saveBlob } from './lib/storage';
 import { detectClientOS } from './lib/osDetector';
-import { createXournalBridgeJob, getXournalBridgeJob, wait } from './lib/xournalBridge';
+import {
+  createXournalBridgeJob,
+  deleteXournalBridgeJob,
+  getXournalBridgeJob,
+  getXournalBridgeResult,
+  uploadXournalBridgeInput,
+  wait,
+} from './lib/xournalBridge';
 import { TopNav } from './components/TopNav';
 import { Sidebar } from './components/Sidebar';
 import { Breadcrumbs } from './components/Breadcrumbs';
@@ -66,6 +73,7 @@ import {
   deleteFileFromDrive,
   uploadFileToDrive,
   downloadFileFromDrive,
+  updateDriveFile,
 } from './lib/googleDriveStorage';
 
 const STORAGE_KEY_ITEMS = 'nexus_workspace_items_zero_v1';
@@ -416,27 +424,40 @@ export default function App() {
       throw new Error('Esta nota ainda não tem uma cópia no Google Drive. Use “Sincronizar com Drive” e tente novamente.');
     }
 
-    onStatus('Enviando pedido para a bridge Windows…');
-    const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name, driveFileId: item.driveFileId });
+    onStatus('Baixando a nota do Google Drive…');
+    const sourceBlob = await downloadFileFromDrive(token, item.driveFileId);
+    onStatus('Enviando a nota para a bridge Windows…');
+    const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name });
+    try {
+      await uploadXournalBridgeInput(job.id, sourceBlob);
+    } catch (error) {
+      await deleteXournalBridgeJob(job.id).catch(() => undefined);
+      throw error;
+    }
     onStatus('Pedido enviado. Aguardando a bridge Windows…');
 
     while (true) {
       await wait(3000);
       const current = await getXournalBridgeJob(job.id);
-      if (current.status === 'failed') throw new Error(current.error || 'A bridge não conseguiu concluir a edição.');
+      if (current.status === 'failed') {
+        await deleteXournalBridgeJob(job.id).catch(() => undefined);
+        throw new Error(current.error || 'A bridge não conseguiu concluir a edição.');
+      }
       if (current.status === 'completed') break;
       onStatus(current.status === 'processing'
         ? 'Xournal++ aberto. O arquivo será sincronizado quando você fechar o programa…'
         : 'Aguardando a bridge Windows…');
     }
 
-    onStatus('Baixando a versão sincronizada do Google Drive…');
-    const updatedBlob = await downloadFileFromDrive(token, item.driveFileId);
+    onStatus('Salvando a versão editada no Google Drive…');
+    const updatedBlob = await getXournalBridgeResult(job.id);
+    await updateDriveFile(token, item.driveFileId, updatedBlob);
     const blobKey = item.blobKey || `blob_${item.id}`;
     await saveBlob(blobKey, updatedBlob);
     const updatedItem = { ...item, blobKey, size: updatedBlob.size, updatedAt: Date.now() };
     setItems((current) => current.map((currentItem) => currentItem.id === item.id ? updatedItem : currentItem));
     setPreviewItem((current) => current?.id === item.id ? updatedItem : current);
+    await deleteXournalBridgeJob(job.id).catch((error) => console.warn('Não foi possível limpar o arquivo temporário da bridge:', error));
     onStatus('Edição sincronizada com o Google Drive.');
     window.setTimeout(() => onStatus(''), 5000);
   };
