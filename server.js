@@ -179,6 +179,11 @@ app.put('/api/bridge/jobs/:jobId/input', requireFirebaseUser, express.raw({ type
   if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
     return res.status(400).json({ error: 'The Xournal++ input file is empty.' });
   }
+  const inputSha256 = crypto.createHash('sha256').update(req.body).digest('hex');
+  const receivedSha256 = String(req.get('x-content-sha256') || '').toLowerCase();
+  if (receivedSha256 && receivedSha256 !== inputSha256) {
+    return res.status(400).json({ error: 'The uploaded Xournal++ file failed its integrity check. Please retry the upload.' });
+  }
   fs.mkdirSync(jobDir, { recursive: true });
   fs.writeFileSync(path.join(jobDir, 'input.bin'), req.body, { mode: 0o600 });
   const jobs = loadBridgeJobs();
@@ -188,6 +193,8 @@ app.put('/api/bridge/jobs/:jobId/input', requireFirebaseUser, express.raw({ type
     return res.status(409).json({ error: 'The bridge job changed while its input was uploading.' });
   }
   current.status = 'queued';
+  current.inputSha256 = inputSha256;
+  current.inputSize = req.body.length;
   saveBridgeJobs(jobs);
   res.status(204).end();
 });
@@ -213,6 +220,13 @@ app.get('/api/bridge/jobs/:jobId/input', requireBridgeToken, (req, res) => {
   }
   const inputPath = path.join(jobDir, 'input.bin');
   if (!fs.existsSync(inputPath)) return res.status(404).json({ error: 'Bridge input file is missing.' });
+  const input = fs.readFileSync(inputPath);
+  const inputSha256 = job.inputSha256 || crypto.createHash('sha256').update(input).digest('hex');
+  if (job.inputSize && job.inputSize !== input.length) {
+    return res.status(409).json({ error: 'Bridge input file size changed after upload.' });
+  }
+  res.set('X-Content-SHA256', inputSha256);
+  res.set('Content-Length', String(input.length));
   res.type('application/octet-stream').sendFile(inputPath);
 });
 

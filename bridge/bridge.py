@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import argparse
 import gzip
+import hashlib
 import os
 import re
 import shutil
@@ -88,19 +89,32 @@ def download_bridge_file(session: requests.Session, job_id: str, destination: Pa
         response.raise_for_status()
         with destination.open("wb") as output:
             shutil.copyfileobj(response.raw, output)
+        expected_sha256 = response.headers.get("X-Content-SHA256", "").lower()
+        expected_size = response.headers.get("Content-Length")
+
+    if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
+        raise RuntimeError("O servidor não enviou a verificação de integridade. Atualize o site no Render e tente novamente.")
+    actual_size = destination.stat().st_size
+    actual_sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()
+    if expected_size and actual_size != int(expected_size):
+        raise RuntimeError(f"Download incompleto: o servidor enviou {expected_size} bytes, mas chegaram {actual_size}.")
+    if actual_sha256 != expected_sha256:
+        raise RuntimeError("A nota foi alterada ou truncada durante a transferência. Nenhum arquivo foi aberto no Xournal++.")
 
 
 def validate_xournal_file(file_path: Path, suffix: str):
     try:
         if suffix == ".xopp":
             with gzip.open(file_path, "rb") as compressed_xml:
-                ET.parse(compressed_xml)
+                root = ET.parse(compressed_xml).getroot()
         else:
-            ET.parse(file_path)
+            root = ET.parse(file_path).getroot()
+        if root.tag.split("}")[-1] != "xournal":
+            raise ET.ParseError("O elemento raiz não é xournal.")
     except (gzip.BadGzipFile, EOFError, ET.ParseError, OSError) as error:
         raise RuntimeError(
-            "A nota recebida está incompleta ou corrompida. O Nexus não a enviou ao Xournal++; "
-            "sincronize novamente o arquivo original e tente outra vez."
+            "A versão baixada do Google Drive não é um documento Xournal++ íntegro. "
+            "O arquivo não foi aberto nem substituído. Reenvie a nota original ao Drive e tente novamente."
         ) from error
 
 

@@ -450,8 +450,7 @@ export default function App() {
     }
 
     onStatus('Preparando a nota para edição…');
-    const localSourceBlob = item.blobKey ? await getBlob(item.blobKey) : null;
-    const sourceBlob = localSourceBlob || await downloadFileFromDrive(token, item.driveFileId);
+    const sourceBlob = await downloadFileFromDrive(token, item.driveFileId);
     onStatus('Enviando a nota para a bridge Windows…');
     const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name });
     try {

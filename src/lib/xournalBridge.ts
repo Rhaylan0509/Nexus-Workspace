@@ -58,10 +58,12 @@ export function requestLocalXournalBridge() {
   link.remove();
 }
 
-export function uploadXournalBridgeInput(jobId: string, file: Blob) {
+export async function uploadXournalBridgeInput(jobId: string, file: Blob) {
+  const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+  const sha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
   return bridgeRequest<void>(`/jobs/${encodeURIComponent(jobId)}/input`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/octet-stream' },
+    headers: { 'Content-Type': 'application/octet-stream', 'X-Content-SHA256': sha256 },
     body: file,
   });
 }
