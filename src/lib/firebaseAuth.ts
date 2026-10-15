@@ -13,11 +13,12 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 export const SCOPES = [
-  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/drive',
 ];
 
 const provider = new GoogleAuthProvider();
 SCOPES.forEach((scope) => provider.addScope(scope));
+provider.setCustomParameters({ prompt: 'consent', include_granted_scopes: 'true' });
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
@@ -96,7 +97,7 @@ export const googleCalendarSignIn = async (): Promise<{ user: User; accessToken:
   try {
     isSigningIn = true;
     const calendarProvider = new GoogleAuthProvider();
-    calendarProvider.addScope('https://www.googleapis.com/auth/drive.file');
+    calendarProvider.addScope('https://www.googleapis.com/auth/drive');
     calendarProvider.addScope('https://www.googleapis.com/auth/calendar.events.owned');
     calendarProvider.setCustomParameters({ prompt: 'consent' });
     const result = await signInWithPopup(auth, calendarProvider);

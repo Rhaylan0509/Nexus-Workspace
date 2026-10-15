@@ -42,17 +42,18 @@ async function throwDriveApiError(response: Response, fallback: string): Promise
   } else if (response.status === 403 && ['accessNotConfigured', 'SERVICE_DISABLED'].includes(reason)) {
     message = 'A Google Drive API está desativada no projeto vinculado ao Firebase. Ative-a no Google Cloud Console.';
   } else if (response.status === 403 && ['insufficientPermissions', 'PERMISSION_DENIED'].includes(reason)) {
-    message = 'O Google Drive não concedeu a permissão drive.file. Desconecte e conecte novamente o Google Drive para autorizar o acesso.';
+    message = 'O Google Drive não concedeu as permissões necessárias. Desconecte e conecte novamente para autorizar o acesso ao Drive.';
   }
   throw new GoogleDriveApiError(message, response.status, reason);
 }
 
 /**
- * Finds or creates the 'Nexus Workspace' root folder in the user's Google Drive
+ * Finds or creates the 'Nexus Workspace' root folder in the user's Google Drive.
+ * When OAuth clients have made duplicate roots, prefer the populated one.
  */
 export async function ensureAppRootFolder(accessToken: string): Promise<string> {
   const query = `name = '${APP_ROOT_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-  const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`;
+  const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime&pageSize=100`;
 
   const searchRes = await fetch(searchUrl, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -64,7 +65,20 @@ export async function ensureAppRootFolder(accessToken: string): Promise<string> 
 
   const data = await searchRes.json();
   if (data.files && data.files.length > 0) {
-    return data.files[0].id;
+    if (data.files.length === 1) return data.files[0].id;
+
+    const candidates = await Promise.all(data.files.map(async (folder: { id: string; createdTime?: string }) => {
+      const childrenQuery = `'${folder.id}' in parents and trashed = false`;
+      const childrenUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(childrenQuery)}&fields=files(id)&pageSize=1000`;
+      const childrenRes = await fetch(childrenUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!childrenRes.ok) return throwDriveApiError(childrenRes, 'Erro ao verificar pastas Nexus Workspace existentes.');
+      const children = await childrenRes.json();
+      return { id: folder.id, count: (children.files || []).length, createdTime: Date.parse(folder.createdTime || '') || 0 };
+    }));
+    candidates.sort((a, b) => b.count - a.count || a.createdTime - b.createdTime);
+    return candidates[0].id;
   }
 
   // Create folder

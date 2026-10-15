@@ -12,7 +12,9 @@ O login do Drive usa Firebase Authentication. Se o app mostrar `auth/unauthorize
 
 O app agora exibe o código/cause de erros OAuth conhecidos e orienta sobre o domínio bloqueado, provedor desligado, popup e falha de rede.
 
-O calendário usa o OAuth do Firebase Authentication e chama a API Google Calendar diretamente no navegador. A autorização solicita `calendar.events.owned` para consultar, criar e remover eventos em calendários pertencentes à conta, além de `drive.file` para manter o acesso ao Drive existente.
+O calendário usa o OAuth do Firebase Authentication e chama a API Google Calendar diretamente no navegador. A autorização solicita `calendar.events.owned` para consultar, criar e remover eventos em calendários pertencentes à conta, além do escopo `drive` para localizar e sincronizar a pasta Nexus Workspace compartilhada com o aplicativo desktop.
+
+O escopo `drive` permite tecnicamente que o site veja, edite, crie e exclua arquivos em todo o Google Drive. O código de sincronização do site restringe suas operações à pasta `Nexus Workspace`, mas a tela de consentimento do Google informa o acesso amplo. Ao reconectar, revise e aceite a nova permissão. Como site e desktop usam clientes OAuth diferentes, o escopo menor `drive.file` não permite ao site descobrir uma pasta criada pelo desktop.
 
 ## Configuração para testar
 
