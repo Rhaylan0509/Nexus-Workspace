@@ -35,7 +35,6 @@ interface SidebarProps {
   onConnectDrive: () => void;
   onDisconnectDrive: () => void;
   onSyncDrive: () => void;
-  syncLabel?: string;
   onResetWorkspace?: () => void;
 }
 
@@ -57,7 +56,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onConnectDrive,
   onDisconnectDrive,
   onSyncDrive,
-  syncLabel,
 }) => {
   const activeItems = items.filter((i) => !i.trashed);
   const trashedItems = items.filter((i) => i.trashed);
@@ -230,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full py-1.5 px-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isDriveSyncing ? 'animate-spin' : ''}`} />
-                <span>{isDriveSyncing ? 'Sincronizando...' : syncLabel || 'Sincronizar com Drive'}</span>
+                <span>{isDriveSyncing ? 'Sincronizando...' : 'Sincronizar com Drive'}</span>
               </button>
 
               {lastSyncTime && (

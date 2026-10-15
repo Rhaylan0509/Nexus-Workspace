@@ -61,9 +61,11 @@ import {
   getDriveStorageQuota,
   GoogleDriveApiError,
   DriveStorageQuota,
+  loadWorkspaceFromGoogleDrive,
+  mergeWorkspaceWithGoogleDrive,
+  updateDriveFileMetadata,
+  deleteFileFromDrive,
 } from './lib/googleDriveStorage';
-import { syncDesktopLibrary } from './lib/desktopLibrarySync';
-import { DesktopSyncSession, finishDesktopSync, readDesktopSyncSession } from './lib/desktopSync';
 
 const STORAGE_KEY_ITEMS = 'nexus_workspace_items_zero_v1';
 const STORAGE_KEY_LINKS = 'nexus_quick_links_v6';
@@ -115,7 +117,6 @@ export default function App() {
   const [driveQuota, setDriveQuota] = useState<DriveStorageQuota | null>(null);
   const [isDriveSyncing, setIsDriveSyncing] = useState<boolean>(false);
   const [syncStatusMessage, setSyncStatusMessage] = useState<string | null>(null);
-  const [desktopSyncSession, setDesktopSyncSession] = useState<DesktopSyncSession | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(() => {
     const saved = localStorage.getItem('nexus_last_drive_sync');
     return saved ? parseInt(saved, 10) : null;
@@ -138,13 +139,6 @@ export default function App() {
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    const session = readDesktopSyncSession();
-    if (!session) return;
-    setDesktopSyncSession(session);
-    setSyncStatusMessage('Xournal++ Desktop conectado. Conecte o Google Drive e clique em Sincronizar para transferir os arquivos.');
   }, []);
 
   // Sync to local storage
@@ -336,7 +330,16 @@ export default function App() {
         setDriveToken(res.accessToken);
         const quota = await getDriveStorageQuota(res.accessToken);
         setDriveQuota(quota);
-        setSyncStatusMessage('Google Drive conectado com sucesso!');
+        const driveItems = await loadWorkspaceFromGoogleDrive(res.accessToken);
+        if (driveItems.length) {
+          setItems((current) => mergeWorkspaceWithGoogleDrive(current, driveItems));
+          setSyncStatusMessage('Arquivos carregados do Google Drive.');
+        } else {
+          const localOnlyItems = items.filter((item) => !item.driveFileId);
+          const driveIds = await syncAllItemsToGoogleDrive(res.accessToken, localOnlyItems);
+          setItems(localOnlyItems.map((item) => driveIds[item.id] ? { ...item, driveFileId: driveIds[item.id] } : item));
+          setSyncStatusMessage('Biblioteca enviada ao Google Drive.');
+        }
         setTimeout(() => setSyncStatusMessage(null), 3000);
       }
     } catch (err: unknown) {
@@ -380,12 +383,16 @@ export default function App() {
     setSyncStatusMessage('Iniciando sincronização com Google Drive...');
 
     try {
-      let itemsToSync = items;
-      if (desktopSyncSession) {
-        itemsToSync = await syncDesktopLibrary(token, desktopSyncSession, itemsToSync, (message) => {
-          setSyncStatusMessage(message);
-        });
+      let sourceItems = items;
+      for (const item of sourceItems.filter((candidate) => candidate.driveFileId && candidate.trashed !== Boolean(candidate.metadata?.driveTrashed))) {
+        await updateDriveFileMetadata(token, item.driveFileId!, { trashed: item.trashed });
+        sourceItems = sourceItems.map((candidate) => candidate.id === item.id
+          ? { ...candidate, metadata: { ...candidate.metadata, driveTrashed: candidate.trashed } }
+          : candidate);
       }
+      setSyncStatusMessage('Lendo a versão atual do Google Drive...');
+      const driveItems = await loadWorkspaceFromGoogleDrive(token);
+      let itemsToSync = mergeWorkspaceWithGoogleDrive(sourceItems, driveItems);
       const driveIds = await syncAllItemsToGoogleDrive(token, itemsToSync, (curr, tot, name) => {
         setSyncStatusMessage(`Sincronizando ${curr}/${tot}: ${name}`);
       });
@@ -400,13 +407,7 @@ export default function App() {
       const updatedQuota = await getDriveStorageQuota(token);
       setDriveQuota(updatedQuota);
 
-      if (desktopSyncSession) {
-        await finishDesktopSync(desktopSyncSession);
-        setDesktopSyncSession(null);
-        setSyncStatusMessage('Arquivos sincronizados entre o Xournal++ Desktop e o Google Drive.');
-      } else {
-        setSyncStatusMessage('Todos os itens foram sincronizados com o Google Drive!');
-      }
+      setSyncStatusMessage('Biblioteca atualizada pelo Google Drive.');
       setTimeout(() => setSyncStatusMessage(null), 3500);
     } catch (err: any) {
       console.error('Erro ao sincronizar com Google Drive:', err);
@@ -417,14 +418,25 @@ export default function App() {
       }
       setSyncStatusMessage(err instanceof Error ? err.message : 'Erro ao sincronizar com Google Drive.');
       window.setTimeout(() => setSyncStatusMessage(null), 15000);
-      if (desktopSyncSession) {
-        await finishDesktopSync(desktopSyncSession, err instanceof Error ? err.message : 'Falha na sincronização.').catch(() => undefined);
-        setDesktopSyncSession(null);
-      }
     } finally {
       setIsDriveSyncing(false);
     }
   };
+
+  useEffect(() => {
+    if (!driveToken) return;
+    const refreshFromDrive = async () => {
+      if (isDriveSyncing) return;
+      try {
+        const driveItems = await loadWorkspaceFromGoogleDrive(driveToken);
+        setItems((current) => mergeWorkspaceWithGoogleDrive(current, driveItems));
+      } catch (error) {
+        console.warn('Não foi possível atualizar a Biblioteca pelo Drive:', error);
+      }
+    };
+    const interval = window.setInterval(refreshFromDrive, 60_000);
+    return () => window.clearInterval(interval);
+  }, [driveToken, isDriveSyncing]);
 
   const handleResetWorkspace = () => {
     setConfirmModalState({
@@ -508,7 +520,8 @@ export default function App() {
         message: `Tem certeza de que deseja excluir permanentemente "${item.name}"? Esta ação removerá o arquivo definitivamente e não poderá ser desfeita.`,
         confirmLabel: 'Excluir Definitivamente',
         isDestructive: true,
-        onConfirm: () => {
+        onConfirm: async () => {
+          if (driveToken && item.driveFileId) await deleteFileFromDrive(driveToken, item.driveFileId);
           setItems((prev) => prev.filter((i) => i.id !== item.id));
           if (previewItem?.id === item.id) setPreviewItem(null);
         },
@@ -523,7 +536,7 @@ export default function App() {
         onConfirm: () => {
           setItems((prev) =>
             prev.map((i) =>
-              i.id === item.id ? { ...i, trashed: true, trashedAt: Date.now() } : i
+              i.id === item.id ? { ...i, trashed: true, trashedAt: Date.now(), updatedAt: Date.now() } : i
             )
           );
           if (previewItem?.id === item.id) setPreviewItem(null);
@@ -534,7 +547,7 @@ export default function App() {
 
   const handleRestoreItem = (item: FileItem) => {
     setItems((prev) =>
-      prev.map((i) => (i.id === item.id ? { ...i, trashed: false } : i))
+      prev.map((i) => (i.id === item.id ? { ...i, trashed: false, updatedAt: Date.now() } : i))
     );
   };
 
@@ -766,7 +779,6 @@ export default function App() {
           onConnectDrive={handleConnectDrive}
           onDisconnectDrive={handleDisconnectDrive}
           onSyncDrive={handleSyncDrive}
-          syncLabel={desktopSyncSession ? 'Sincronizar com app' : 'Sincronizar com Drive'}
           onResetWorkspace={handleResetWorkspace}
         />
 

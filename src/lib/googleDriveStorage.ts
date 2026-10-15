@@ -3,7 +3,7 @@
  * Manages folders, notebooks, markdown notes, .xopp files and PDFs in the user's Google Drive.
  */
 
-import { getBlob } from './storage';
+import { getBlob, saveBlob } from './storage';
 import { FileItem } from '../types';
 
 export interface DriveFileMetadata {
@@ -24,6 +24,7 @@ export interface DriveStorageQuota {
 }
 
 const APP_ROOT_FOLDER_NAME = 'Nexus Workspace';
+const GOOGLE_FOLDER_MIME = 'application/vnd.google-apps.folder';
 
 export class GoogleDriveApiError extends Error {
   constructor(message: string, readonly status: number, readonly reason?: string) {
@@ -213,7 +214,7 @@ export async function updateDriveFile(
 export async function updateDriveFileMetadata(
   accessToken: string,
   fileId: string,
-  metadata: { name?: string; appProperties?: Record<string, string> },
+  metadata: { name?: string; trashed?: boolean; appProperties?: Record<string, string> },
 ): Promise<void> {
   const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`, {
     method: 'PATCH',
@@ -259,6 +260,112 @@ export async function getDriveStorageQuota(accessToken: string): Promise<DriveSt
     console.warn('Não foi possível obter cota do Drive:', err);
   }
   return {};
+}
+
+/** Loads the current Nexus Workspace hierarchy from Drive and caches binary files locally. */
+export async function loadWorkspaceFromGoogleDrive(accessToken: string): Promise<FileItem[]> {
+  const rootId = await ensureAppRootFolder(accessToken);
+  const items: FileItem[] = [];
+  const queue: Array<{ driveId: string; parentId: string | null }> = [{ driveId: rootId, parentId: null }];
+
+  while (queue.length) {
+    const parent = queue.shift()!;
+    let pageToken = '';
+    do {
+      const params = new URLSearchParams({
+        q: `'${parent.driveId}' in parents and trashed = false`,
+        fields: 'nextPageToken,files(id,name,mimeType,size,modifiedTime,parents)',
+        pageSize: '1000',
+        orderBy: 'folder,name',
+      });
+      if (pageToken) params.set('pageToken', pageToken);
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) return throwDriveApiError(response, 'Falha ao ler os arquivos do Google Drive.');
+      const result = await response.json();
+
+      for (const remote of result.files || []) {
+        const id = `drive-${remote.id}`;
+        const modifiedAt = Date.parse(remote.modifiedTime || '') || Date.now();
+        if (remote.mimeType === GOOGLE_FOLDER_MIME) {
+          const isNotebook = remote.name.startsWith('[Caderno] ');
+          const name = isNotebook ? remote.name.slice('[Caderno] '.length) : remote.name;
+          items.push({
+            id,
+            name,
+            type: isNotebook ? 'notebook' : 'folder',
+            parentId: parent.parentId,
+            createdAt: modifiedAt,
+            updatedAt: modifiedAt,
+            tags: [isNotebook ? 'notebook' : 'folder'],
+            starred: false,
+            trashed: false,
+            driveFileId: remote.id,
+          });
+          queue.push({ driveId: remote.id, parentId: id });
+          continue;
+        }
+
+        if (remote.mimeType?.startsWith('application/vnd.google-apps.')) continue;
+
+        const extension = remote.name.includes('.') ? remote.name.split('.').pop()!.toLowerCase() : '';
+        const blobResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(remote.id)}?alt=media`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!blobResponse.ok) return throwDriveApiError(blobResponse, `Falha ao baixar ${remote.name} do Google Drive.`);
+        const blob = await blobResponse.blob();
+        const blobKey = `drive-${remote.id}`;
+        await saveBlob(blobKey, blob);
+        items.push({
+          id,
+          name: remote.name,
+          type: 'file',
+          parentId: parent.parentId,
+          createdAt: modifiedAt,
+          updatedAt: modifiedAt,
+          size: Number(remote.size) || blob.size,
+          mimeType: remote.mimeType || blob.type || 'application/octet-stream',
+          extension,
+          blobKey,
+          ...(extension === 'md' ? { content: await blob.text() } : {}),
+          tags: [extension || 'file'],
+          starred: false,
+          trashed: false,
+          driveFileId: remote.id,
+        });
+      }
+      pageToken = result.nextPageToken || '';
+    } while (pageToken);
+  }
+  return items;
+}
+
+/** Keeps unsynced local edits, while taking newer and newly added Drive files as the source of truth. */
+export function mergeWorkspaceWithGoogleDrive(localItems: FileItem[], driveItems: FileItem[]): FileItem[] {
+  const localByDriveId = new Map(localItems.filter((item) => item.driveFileId).map((item) => [item.driveFileId!, item]));
+  const merged = driveItems.map((remote) => {
+    const local = localByDriveId.get(remote.driveFileId || '');
+    if (!local) return { ...remote };
+    const chosen = local.updatedAt > remote.updatedAt + 1500 ? local : remote;
+    return {
+      ...chosen,
+      id: local.id,
+      metadata: { ...remote.metadata, ...local.metadata },
+      starred: local.starred,
+      tags: local.tags?.length ? local.tags : remote.tags,
+    };
+  });
+  const driveIdToLocalId = new Map(merged.filter((item) => item.driveFileId).map((item) => [item.driveFileId!, item.id]));
+  for (const item of merged) {
+    const remoteParent = driveItems.find((remote) => remote.id === item.id || remote.driveFileId === item.driveFileId)?.parentId;
+    if (remoteParent) {
+      const parentDriveId = driveItems.find((remote) => remote.id === remoteParent)?.driveFileId;
+      if (parentDriveId && driveIdToLocalId.has(parentDriveId)) item.parentId = driveIdToLocalId.get(parentDriveId)!;
+    }
+  }
+  merged.push(...localItems.filter((item) => !item.driveFileId || item.trashed));
+  return merged;
 }
 
 /**
