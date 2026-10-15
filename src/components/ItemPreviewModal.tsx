@@ -23,12 +23,10 @@ import {
   Link as LinkIcon,
   Pencil,
   Trash2,
-  LoaderCircle,
 } from 'lucide-react';
 import { FileItem } from '../types';
 import { formatBytes, getBlob, saveBlob, triggerFileDownload, downloadTextAsFile } from '../lib/storage';
 import { renderMarkdown } from '../lib/markdown';
-import { detectClientOS, ClientOSInfo } from '../lib/osDetector';
 import { parseXoppDocument, decompressXoppBlob, XoppParsedDocument } from '../lib/xournalParser';
 import { renderAllPdfPagesToDataUrls } from '../lib/pdfRenderer';
 import { PdfViewer } from './PdfViewer';
@@ -43,7 +41,6 @@ interface ItemPreviewModalProps {
   onUpdateItemMetadata?: (itemId: string, metadata: any) => void;
   onDeleteItem?: (item: FileItem) => void;
   onRenameItem?: (item: FileItem) => void;
-  onOpenXournal?: (item: FileItem, onStatus: (status: string) => void) => Promise<void>;
 }
 
 export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
@@ -55,12 +52,8 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
   onUpdateItemMetadata,
   onDeleteItem,
   onRenameItem,
-  onOpenXournal,
 }) => {
   if (!item) return null;
-
-  // OS detection
-  const [osInfo, setOsInfo] = useState<ClientOSInfo>(() => detectClientOS());
 
   // Views & Content
   const [activeTab, setActiveTab] = useState<'preview' | 'edit'>(initialMode);
@@ -70,8 +63,6 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
   const [rawXml, setRawXml] = useState<string | null>(null);
   const [hasSavedNotice, setHasSavedNotice] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isOpeningXournal, setIsOpeningXournal] = useState(false);
-  const [xournalBridgeStatus, setXournalBridgeStatus] = useState('');
 
   // Xournal++ Paper Background Customization
   const [paperPattern, setPaperPattern] = useState<'dotted' | 'lined' | 'graph' | 'plain' | 'pdf'>('pdf');
@@ -107,7 +98,6 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
   useEffect(() => {
     setContent(item.content || '');
     setActiveTab(initialMode || (item.type === 'note' && !item.content && item.extension === 'md' ? 'edit' : 'preview'));
-    setOsInfo(detectClientOS());
     setCurrentXoppPage(1);
 
     let url: string | null = null;
@@ -593,7 +583,7 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
               </button>
             )}
 
-            {/* Xournal++ Actions: Export SVG & Windows App open */}
+            {/* Xournal++ Actions: export only; launching the desktop app is handled by its own application. */}
             {isXopp && (
               <>
                 <button
@@ -605,39 +595,6 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
                   <span>Exportar SVG</span>
                 </button>
 
-                <button
-                  onClick={async () => {
-                    if (isOpeningXournal) return;
-                    if (!osInfo.isWindows) {
-                      setXournalBridgeStatus('A ponte do Xournal++ só pode ser executada no Windows.');
-                      return;
-                    }
-                    if (!item.driveFileId) {
-                      setXournalBridgeStatus('Clique em “Sincronize com Drive” antes de abrir esta nota.');
-                      return;
-                    }
-                    if (!onOpenXournal) {
-                      setXournalBridgeStatus('A integração da bridge não está disponível nesta tela.');
-                      return;
-                    }
-                    setIsOpeningXournal(true);
-                    setXournalBridgeStatus('Conectando à bridge Windows…');
-                    try {
-                      await onOpenXournal(item, setXournalBridgeStatus);
-                    } catch (error) {
-                      setXournalBridgeStatus(error instanceof Error ? error.message : 'Falha ao abrir a nota no Xournal++.');
-                    } finally {
-                      setIsOpeningXournal(false);
-                    }
-                  }}
-                  disabled={isOpeningXournal}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-2xs transition-colors cursor-pointer"
-                  title={!osInfo.isWindows ? 'Disponível somente no Windows' : item.driveFileId ? 'Abrir o arquivo sincronizado pela bridge Windows' : 'Sincronize primeiro com o Google Drive'}
-                >
-                  {isOpeningXournal ? <LoaderCircle className="w-3.5 h-3.5 animate-spin" /> : <PenTool className="w-3.5 h-3.5" />}
-                  <span>{isOpeningXournal ? 'Aguardando Xournal++' : 'Abrir no Xournal++'}</span>
-                </button>
-                {xournalBridgeStatus && <span className="max-w-[210px] truncate text-[10px] text-neutral-500" title={xournalBridgeStatus}>{xournalBridgeStatus}</span>}
               </>
             )}
 

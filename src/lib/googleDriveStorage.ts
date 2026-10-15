@@ -12,6 +12,7 @@ export interface DriveFileMetadata {
   mimeType: string;
   parents?: string[];
   size?: string;
+  modifiedTime?: string;
   webViewLink?: string;
   iconLink?: string;
 }
@@ -209,6 +210,24 @@ export async function updateDriveFile(
   }
 }
 
+export async function updateDriveFileMetadata(
+  accessToken: string,
+  fileId: string,
+  metadata: { name?: string; appProperties?: Record<string, string> },
+): Promise<void> {
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(metadata),
+  });
+  if (!response.ok) {
+    return throwDriveApiError(response, 'Falha ao atualizar os metadados no Google Drive.');
+  }
+}
+
 /**
  * Deletes a file or folder from Google Drive
  */
@@ -265,16 +284,26 @@ export async function syncAllItemsToGoogleDrive(
   for (const folder of folders) {
     onProgress?.(++processed, total, `Pasta: ${folder.name}`);
     const parentDriveId = folder.parentId ? localToDriveIdMap[folder.parentId] || rootDriveId : rootDriveId;
-    const driveFolder = await createDriveFolder(accessToken, folder.name, parentDriveId);
-    localToDriveIdMap[folder.id] = driveFolder.id;
+    if (folder.driveFileId) {
+      await updateDriveFileMetadata(accessToken, folder.driveFileId, { name: folder.name });
+      localToDriveIdMap[folder.id] = folder.driveFileId;
+    } else {
+      const driveFolder = await createDriveFolder(accessToken, folder.name, parentDriveId);
+      localToDriveIdMap[folder.id] = driveFolder.id;
+    }
   }
 
   // 2. Sync Notebooks
   for (const notebook of notebooks) {
     onProgress?.(++processed, total, `Caderno: ${notebook.name}`);
     const parentDriveId = notebook.parentId ? localToDriveIdMap[notebook.parentId] || rootDriveId : rootDriveId;
-    const driveNotebook = await createDriveFolder(accessToken, `[Caderno] ${notebook.name}`, parentDriveId);
-    localToDriveIdMap[notebook.id] = driveNotebook.id;
+    if (notebook.driveFileId) {
+      await updateDriveFileMetadata(accessToken, notebook.driveFileId, { name: `[Caderno] ${notebook.name}` });
+      localToDriveIdMap[notebook.id] = notebook.driveFileId;
+    } else {
+      const driveNotebook = await createDriveFolder(accessToken, `[Caderno] ${notebook.name}`, parentDriveId);
+      localToDriveIdMap[notebook.id] = driveNotebook.id;
+    }
   }
 
   // 3. Sync Files & Notes
@@ -291,14 +320,20 @@ export async function syncAllItemsToGoogleDrive(
       });
     }
 
-    const driveFile = await uploadFileToDrive(
-      accessToken,
-      file.name,
-      blob,
-      parentDriveId,
-      file.mimeType || 'application/octet-stream'
-    );
-    localToDriveIdMap[file.id] = driveFile.id;
+    if (file.driveFileId) {
+      await updateDriveFile(accessToken, file.driveFileId, blob, file.mimeType || 'application/octet-stream');
+      await updateDriveFileMetadata(accessToken, file.driveFileId, { name: file.name });
+      localToDriveIdMap[file.id] = file.driveFileId;
+    } else {
+      const driveFile = await uploadFileToDrive(
+        accessToken,
+        file.name,
+        blob,
+        parentDriveId,
+        file.mimeType || 'application/octet-stream'
+      );
+      localToDriveIdMap[file.id] = driveFile.id;
+    }
   }
 
   return localToDriveIdMap;

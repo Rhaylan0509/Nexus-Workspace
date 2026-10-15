@@ -33,17 +33,6 @@ import {
 } from './types';
 import { INITIAL_FILES, INITIAL_QUICK_LINKS } from './data/initialData';
 import { getBlob, triggerFileDownload, saveBlob } from './lib/storage';
-import { detectClientOS } from './lib/osDetector';
-import {
-  createXournalBridgeJob,
-  deleteXournalBridgeJob,
-  getXournalBridgeJob,
-  getXournalBridgeResult,
-  getXournalBridgeStatus,
-  requestLocalXournalBridge,
-  uploadXournalBridgeInput,
-  wait,
-} from './lib/xournalBridge';
 import { TopNav } from './components/TopNav';
 import { Sidebar } from './components/Sidebar';
 import { Breadcrumbs } from './components/Breadcrumbs';
@@ -72,11 +61,9 @@ import {
   getDriveStorageQuota,
   GoogleDriveApiError,
   DriveStorageQuota,
-  deleteFileFromDrive,
-  uploadFileToDrive,
-  downloadFileFromDrive,
-  updateDriveFile,
 } from './lib/googleDriveStorage';
+import { syncDesktopLibrary } from './lib/desktopLibrarySync';
+import { DesktopSyncSession, finishDesktopSync, readDesktopSyncSession } from './lib/desktopSync';
 
 const STORAGE_KEY_ITEMS = 'nexus_workspace_items_zero_v1';
 const STORAGE_KEY_LINKS = 'nexus_quick_links_v6';
@@ -128,6 +115,7 @@ export default function App() {
   const [driveQuota, setDriveQuota] = useState<DriveStorageQuota | null>(null);
   const [isDriveSyncing, setIsDriveSyncing] = useState<boolean>(false);
   const [syncStatusMessage, setSyncStatusMessage] = useState<string | null>(null);
+  const [desktopSyncSession, setDesktopSyncSession] = useState<DesktopSyncSession | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(() => {
     const saved = localStorage.getItem('nexus_last_drive_sync');
     return saved ? parseInt(saved, 10) : null;
@@ -150,6 +138,13 @@ export default function App() {
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    const session = readDesktopSyncSession();
+    if (!session) return;
+    setDesktopSyncSession(session);
+    setSyncStatusMessage('Xournal++ Desktop conectado. Conecte o Google Drive e clique em Sincronizar para transferir os arquivos.');
   }, []);
 
   // Sync to local storage
@@ -385,12 +380,19 @@ export default function App() {
     setSyncStatusMessage('Iniciando sincronização com Google Drive...');
 
     try {
-      const driveIds = await syncAllItemsToGoogleDrive(token, items, (curr, tot, name) => {
+      let itemsToSync = items;
+      if (desktopSyncSession) {
+        itemsToSync = await syncDesktopLibrary(token, desktopSyncSession, itemsToSync, (message) => {
+          setSyncStatusMessage(message);
+        });
+      }
+      const driveIds = await syncAllItemsToGoogleDrive(token, itemsToSync, (curr, tot, name) => {
         setSyncStatusMessage(`Sincronizando ${curr}/${tot}: ${name}`);
       });
-      setItems((current) => current.map((item) => driveIds[item.id]
-        ? { ...item, driveFileId: driveIds[item.id], updatedAt: Date.now() }
-        : item));
+      itemsToSync = itemsToSync.map((item) => driveIds[item.id]
+        ? { ...item, driveFileId: driveIds[item.id] }
+        : item);
+      setItems(itemsToSync);
 
       const now = Date.now();
       setLastSyncTime(now);
@@ -398,7 +400,13 @@ export default function App() {
       const updatedQuota = await getDriveStorageQuota(token);
       setDriveQuota(updatedQuota);
 
-      setSyncStatusMessage('Todos os itens foram sincronizados com o Google Drive!');
+      if (desktopSyncSession) {
+        await finishDesktopSync(desktopSyncSession);
+        setDesktopSyncSession(null);
+        setSyncStatusMessage('Arquivos sincronizados entre o Xournal++ Desktop e o Google Drive.');
+      } else {
+        setSyncStatusMessage('Todos os itens foram sincronizados com o Google Drive!');
+      }
       setTimeout(() => setSyncStatusMessage(null), 3500);
     } catch (err: any) {
       console.error('Erro ao sincronizar com Google Drive:', err);
@@ -409,82 +417,13 @@ export default function App() {
       }
       setSyncStatusMessage(err instanceof Error ? err.message : 'Erro ao sincronizar com Google Drive.');
       window.setTimeout(() => setSyncStatusMessage(null), 15000);
+      if (desktopSyncSession) {
+        await finishDesktopSync(desktopSyncSession, err instanceof Error ? err.message : 'Falha na sincronização.').catch(() => undefined);
+        setDesktopSyncSession(null);
+      }
     } finally {
       setIsDriveSyncing(false);
     }
-  };
-
-  const handleOpenXournal = async (item: FileItem, onStatus: (status: string) => void) => {
-    if (!detectClientOS().isWindows) {
-      throw new Error('A edição pela bridge só está disponível no Windows.');
-    }
-    if (!item.driveFileId) {
-      throw new Error('Esta nota ainda não tem uma cópia no Google Drive. Use “Sincronizar com Drive” e tente novamente.');
-    }
-    const shouldRunBridge = window.confirm(
-      `Executar a bridge do Nexus para abrir “${item.name}” no Xournal++? O navegador também poderá pedir autorização para abrir o aplicativo local.`,
-    );
-    if (!shouldRunBridge) {
-      onStatus('Abertura cancelada.');
-      return;
-    }
-    onStatus('Solicitando autorização para abrir a bridge local…');
-    requestLocalXournalBridge();
-    const token = driveToken || await getAccessToken();
-    if (!token) {
-      throw new Error('Conecte o Google Drive e sincronize a nota antes de abrir no Xournal++.');
-    }
-    onStatus('Aguardando a bridge local iniciar…');
-    let bridgeOnline = false;
-    const startupDeadline = Date.now() + 45_000;
-    while (Date.now() < startupDeadline) {
-      const bridgeStatus = await getXournalBridgeStatus();
-      if (bridgeStatus.online) {
-        bridgeOnline = true;
-        break;
-      }
-      await wait(2000);
-    }
-    if (!bridgeOnline) {
-      throw new Error('A bridge não iniciou. No Windows, configure-a uma vez executando bridge/install-protocol.ps1 e permita que o navegador abra o aplicativo local.');
-    }
-
-    onStatus('Preparando a nota para edição…');
-    const sourceBlob = await downloadFileFromDrive(token, item.driveFileId);
-    onStatus('Enviando a nota para a bridge Windows…');
-    const job = await createXournalBridgeJob({ itemId: item.id, fileName: item.name });
-    try {
-      await uploadXournalBridgeInput(job.id, sourceBlob);
-    } catch (error) {
-      await deleteXournalBridgeJob(job.id).catch(() => undefined);
-      throw error;
-    }
-    onStatus('Pedido enviado. Aguardando a bridge Windows…');
-
-    while (true) {
-      await wait(3000);
-      const current = await getXournalBridgeJob(job.id);
-      if (current.status === 'failed') {
-        await deleteXournalBridgeJob(job.id).catch(() => undefined);
-        throw new Error(current.error || 'A bridge não conseguiu concluir a edição.');
-      }
-      if (current.status === 'completed') break;
-      onStatus(current.status === 'processing'
-        ? 'Xournal++ aberto. O arquivo será sincronizado quando você fechar o programa…'
-        : 'Aguardando a bridge Windows…');
-    }
-
-    onStatus('Salvando a versão editada no Google Drive…');
-    const updatedBlob = await getXournalBridgeResult(job.id);
-    await updateDriveFile(token, item.driveFileId, updatedBlob);
-    const blobKey = item.blobKey || `blob_${item.id}`;
-    await saveBlob(blobKey, updatedBlob);
-    const updatedItem = { ...item, blobKey, size: updatedBlob.size, updatedAt: Date.now() };
-    setItems((current) => current.map((currentItem) => currentItem.id === item.id ? updatedItem : currentItem));
-    setPreviewItem((current) => current?.id === item.id ? updatedItem : current);
-    await deleteXournalBridgeJob(job.id).catch((error) => console.warn('Não foi possível limpar o arquivo temporário da bridge:', error));
-    onStatus('Edição sincronizada com o Google Drive.');
-    window.setTimeout(() => onStatus(''), 5000);
   };
 
   const handleResetWorkspace = () => {
@@ -827,6 +766,7 @@ export default function App() {
           onConnectDrive={handleConnectDrive}
           onDisconnectDrive={handleDisconnectDrive}
           onSyncDrive={handleSyncDrive}
+          syncLabel={desktopSyncSession ? 'Sincronizar com app' : 'Sincronizar com Drive'}
           onResetWorkspace={handleResetWorkspace}
         />
 
@@ -1115,7 +1055,6 @@ export default function App() {
           }}
           onDeleteItem={handleDeleteItem}
           onRenameItem={(item) => setEditingItem(item)}
-          onOpenXournal={handleOpenXournal}
         />
       )}
 
