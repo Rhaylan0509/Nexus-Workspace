@@ -932,6 +932,18 @@
       "filePath": "D:\\\\PC\\\\Documents\\\\área de trabalho\\\\Nexus-Workspace\\\\data\\Ferretto-dfd88118\\História-f8f10578\\historia-geral-semana-2.pdf",
       "driveFileId": "1zRa9pX6gvicit1O3GGiyUjg82dX-j1e0",
       "lastSyncedAt": 1792272519014
+    },
+    {
+      "id": "781af16e-6b23-4d71-8e0f-fe6694c445b4",
+      "type": "note",
+      "name": "Estequiometria",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 1354587,
+      "createdAt": "2026-10-18T17:38:51.559Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Estequiometria.pdf",
+      "updatedAt": 1792345146500
     }
   ]
 }
