@@ -944,6 +944,18 @@
       "createdAt": "2026-10-18T17:38:51.559Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Estequiometria.pdf",
       "updatedAt": 1792345146500
+    },
+    {
+      "id": "1b7b1e99-e9ed-423f-a7c9-3329df70464d",
+      "type": "note",
+      "name": "Literatura",
+      "parentId": "0c96dba9-4e6e-4222-a2c9-2b8e22069597",
+      "createdAt": "2026-10-18T19:39:48.749Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Linguagens-0c96dba9\\Literatura.xopp",
+      "extension": ".xopp"
     }
   ]
 }
