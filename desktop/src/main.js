@@ -4,10 +4,72 @@ const path = require('node:path');
 const { spawn, execFileSync } = require('node:child_process');
 const { gzipSync } = require('node:zlib');
 const { randomUUID } = require('node:crypto');
+const os = require('node:os');
 const { createGitHubSync } = require('./gitHubSync');
+
+// Desativa acúmulo excessivo de cache HTTP no Chromium do Electron
+app.commandLine.appendSwitch('disable-http-cache');
 
 const WORKSPACE_DIR = 'D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace';
 const DATA_DIR = path.join(WORKSPACE_DIR, 'data');
+
+function cleanupTemporaryFiles() {
+  try {
+    // 1. Limpa resíduos acumulados do updater (instaladores antigos órfãos de 80MB+)
+    const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+    const updaterDir = path.join(localAppData, 'xournalpp-desktop-updater');
+    if (fs.existsSync(updaterDir)) {
+      try { fs.rmSync(updaterDir, { recursive: true, force: true }); } catch {}
+    }
+
+    // 2. Limpa arquivos temporários órfãos (.tmp, .bak, autosaves ~) na pasta de dados
+    function cleanTempFiles(dir) {
+      if (!fs.existsSync(dir)) return;
+      const list = fs.readdirSync(dir);
+      for (const item of list) {
+        if (item === '.git') continue;
+        const full = path.join(dir, item);
+        try {
+          const stat = fs.statSync(full);
+          if (stat.isDirectory()) {
+            cleanTempFiles(full);
+          } else if (
+            item.endsWith('.tmp') ||
+            item.endsWith('.bak') ||
+            item.endsWith('~') ||
+            item.startsWith('#') ||
+            item.endsWith('.autosave.xopp')
+          ) {
+            fs.rmSync(full, { force: true });
+          }
+        } catch {}
+      }
+    }
+    cleanTempFiles(DATA_DIR);
+
+    // 3. Limpa arquivos temporários em userData
+    const userDir = app.getPath('userData');
+    if (fs.existsSync(userDir)) {
+      const entries = fs.readdirSync(userDir);
+      for (const item of entries) {
+        if (item.endsWith('.tmp') || item.endsWith('.bak') || item.startsWith('#')) {
+          try { fs.rmSync(path.join(userDir, item), { force: true }); } catch {}
+        }
+      }
+    }
+
+    // 4. Limpa caches de renderização do Electron/Chromium
+    const { session } = require('electron');
+    if (session?.defaultSession) {
+      session.defaultSession.clearCache().catch(() => {});
+      session.defaultSession.clearStorageData({
+        storages: ['shadercache', 'cachestorage']
+      }).catch(() => {});
+    }
+  } catch (err) {
+    console.warn('Erro ao limpar arquivos temporários:', err.message);
+  }
+}
 
 const settingsPath = () => path.join(app.getPath('userData'), 'settings.json');
 function readSettings() {
@@ -357,12 +419,13 @@ function launchDocument(file) {
 }
 
 app.whenReady().then(() => {
+  cleanupTemporaryFiles();
   gitSync.start();
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
-// Sincronização garantida antes de fechar o aplicativo
+// Sincronização garantida antes de fechar o aplicativo e limpeza de temporários
 let isQuitting = false;
 app.on('before-quit', (event) => {
   if (isQuitting) return;
@@ -372,6 +435,7 @@ app.on('before-quit', (event) => {
   gitSync.syncNow()
     .catch((err) => console.error('Erro na sincronização final:', err))
     .finally(() => {
+      cleanupTemporaryFiles();
       app.exit(0);
     });
 });
