@@ -1,0 +1,8 @@
+{
+  "name": "xournalpp-desktop",
+  "version": "0.1.0",
+  "description": "Interface desktop para iniciar e organizar documentos do Xournal++",
+  "main": "src/main.js",
+  "author": "",
+  "license": "MIT"
+}

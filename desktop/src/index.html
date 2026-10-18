@@ -1,0 +1,46 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>Xournal++ Desktop</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">x<span>+</span></div><div><strong>Xournal++</strong><small>DESKTOP</small></div></div>
+    <div class="nav-label">ESPAÇO DE TRABALHO</div>
+    <button class="nav-item active" id="library-nav"><span class="nav-icon">▣</span> Biblioteca</button>
+    <section class="recent-nav-section"><div class="recent-nav-heading"><span>RECENTES</span><span class="recent-count" id="recent-count">0</span></div><div class="recent-list recent-nav-list" id="recent-list"></div><div class="empty-state recent-nav-empty" id="empty-state"><span>Nenhum arquivo recente</span></div></section>
+    <button class="nav-item" id="browse-nav"><span class="nav-icon">▤</span> Documentos</button>
+    <div class="sidebar-bottom"><div class="status-dot"></div><span id="sidebar-status">Verificando instalação…</span><button id="settings-button" title="Configurar Xournal++">⚙</button></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="crumb">Xournal++ <span>/</span> <b>Biblioteca</b></div><div class="topbar-actions"><button id="sync-drive" class="top-open">⟳ <span>Sincronizar GitHub</span></button><button id="new-note" class="top-open secondary-open">✎ <span>Nova anotação</span></button><button id="top-open" class="top-open">↗ <span>Abrir arquivo</span></button></div></header>
+    <div class="library-content" id="library-view">
+      <div class="library-title"><div><div class="eyebrow">SUA COLEÇÃO</div><h1>Biblioteca</h1><p>Navegue por pastas, cadernos e notas.</p></div></div>
+      <div class="explorer-toolbar"><div class="explorer-location"><button class="location-button" id="back-location" title="Voltar" disabled>←</button><button class="location-button" id="up-location" title="Pasta acima" disabled>↑</button><div class="library-crumb" id="library-crumb"></div></div><div class="explorer-actions"><button class="explorer-button" id="import-library-file">Adicionar arquivo</button><button class="explorer-button" id="create-folder">＋ Pasta</button><button class="explorer-button" id="create-notebook">＋ Caderno</button><button class="create-button" id="create-library-note">＋ Nova nota</button></div></div>
+      <div class="explorer-panel"><div id="explorer-list" class="explorer-grid"></div><div class="explorer-empty" id="explorer-empty"><div class="empty-icon">▱</div><b>Esta pasta está vazia</b><span>Crie uma pasta, um caderno ou uma nota.</span></div><div class="drop-overlay" id="drop-overlay" hidden><div>↓</div><b>Solte para adicionar à Biblioteca</b><span id="drop-location"></span></div></div>
+      <div class="library-tip"><span>✦</span> Notas podem ficar soltas na Biblioteca ou dentro de qualquer pasta ou caderno. Cada nota guarda seu tamanho, cor e estilo de papel.</div>
+    </div>
+  </main>
+  <div class="modal-backdrop" id="library-modal" hidden>
+    <form class="modal" id="library-form">
+      <button class="modal-close" type="button" id="modal-close" aria-label="Fechar">×</button>
+      <div class="eyebrow" id="modal-eyebrow">BIBLIOTECA</div><h2 id="modal-title">Novo caderno</h2><p id="modal-description">Dê um nome para organizar suas notas.</p>
+      <div id="entity-name-field"><label class="field-label" for="entity-name">Nome</label><input id="entity-name" class="text-input" maxlength="70" placeholder="Ex.: Estudos" required></div>
+      <div class="note-options" id="note-options" hidden>
+        <div class="option-grid"><label class="field-label">Tamanho<select id="note-size" class="select-input"><option>A4</option><option>A5</option><option>A3</option><option>Carta</option></select></label><label class="field-label">Cor<select id="note-color" class="select-input"><option>Branco</option><option>Creme</option><option>Amarelo claro</option><option>Azul claro</option></select></label></div>
+        <label class="field-label">Estilo<select id="note-style" class="select-input"><option>Em branco</option><option>Linhas</option><option>Pontilhado</option><option>Quadriculado</option></select></label>
+      </div>
+      <div class="container-color-options" id="container-color-options" hidden><label class="field-label">Cor da pasta ou caderno</label><div class="color-choices" id="color-choices"></div><small class="color-selected-label" id="color-selected-label"></small></div>
+      <div class="import-options" id="import-options" hidden><label class="field-label" for="import-path">Caminho do arquivo</label><div class="path-control"><input id="import-path" class="text-input" placeholder="C:\pasta\arquivo.pdf"><button type="button" id="choose-import-file">Escolher…</button></div><small>Também é possível arrastar PDFs, XOPP, XOJ, PNG, JPG ou WEBP para a Biblioteca.</small></div>
+      <div class="modal-actions"><button type="button" class="cancel-button" id="modal-cancel">Cancelar</button><button type="submit" class="create-button" id="modal-submit">Criar caderno</button></div>
+    </form>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>
