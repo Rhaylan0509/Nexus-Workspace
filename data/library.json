@@ -956,6 +956,18 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Linguagens-0c96dba9\\Literatura.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "7aab7468-6f1a-4917-afc1-a3f1709de648",
+      "type": "note",
+      "name": "Revisão-Semana-3",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 1339412,
+      "createdAt": "2026-10-19T12:09:52.083Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Revisão-Semana-3.pdf",
+      "updatedAt": 1792411820630
     }
   ]
 }
