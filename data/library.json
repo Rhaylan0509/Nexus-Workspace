@@ -968,6 +968,17 @@
       "createdAt": "2026-10-19T12:09:52.083Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Revisão-Semana-3.pdf",
       "updatedAt": 1792411820630
+    },
+    {
+      "id": "53b5ed85-071e-4925-b886-9e143db93715",
+      "type": "note",
+      "name": "Simulado 01 - Dia 1 - Humanas",
+      "extension": ".pdf",
+      "parentId": "2e1ad1ea-e406-4080-a475-0b5d475385f4",
+      "imported": true,
+      "fileSize": 36556724,
+      "createdAt": "2026-10-20T23:24:54.676Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Simulado-2e1ad1ea\\Simulado 01 - Dia 1 - Humanas.pdf"
     }
   ]
 }
