@@ -1,0 +1,35 @@
+{
+  "id": "caminhos-para-democratizar-o-acesso-ao-livro-e-a-l-9016b0d9",
+  "eixo": "Cultura, Educação e Cidadania",
+  "tema": "Caminhos para democratizar o acesso ao livro e à leitura no Brasil",
+  "textos_motivadores": [
+    {
+      "titulo": "Texto I — Panorama dos hábitos de leitura",
+      "fonte": "Adaptado de: Instituto Pró-Livro. Pesquisa Retratos da Leitura no Brasil, 2020.",
+      "texto": "A pesquisa Retratos da Leitura no Brasil aponta desafios significativos para o fortalecimento dos hábitos leitores no país. Segundo o levantamento, o preço dos livros, a falta de tempo e a ausência de bibliotecas acessíveis com acervos atualizados figuram entre os principais obstáculos apontados pelos cidadãos. Além disso, observa-se uma disparidade marcante na distribuição do consumo de literatura entre diferentes faixas de renda e regiões do território nacional.",
+      "imagens": [
+        {
+          "arquivo": "theme-1.png",
+          "alt": "theme-1",
+          "url": "/redacao/data/themes/caminhos-para-democratizar-o-acesso-ao-livro-e-a-l-9016b0d9/images/theme-1.png"
+        }
+      ]
+    },
+    {
+      "titulo": "Texto II — O direito humano à literatura",
+      "fonte": "CANDIDO, Antonio. O direito à literatura. Vários escritos. São Paulo: Duas Cidades, 1995 (adaptado).",
+      "texto": "A literatura corresponde a uma necessidade universal que deve ser satisfeita sob pena de mutilação da personalidade, porque nos humaniza. Não há povo sem literatura, assim como não há pessoa sem capacidade de fabulação. Entender o acesso à literatura como um direito humano fundamental é indispensável para a formação crítica, o fortalecimento da empatia e o pleno exercício da cidadania."
+    },
+    {
+      "titulo": "Texto III — Marco legal e políticas públicas",
+      "fonte": "BRASIL. Lei nº 13.696, de 25 de junho de 2018 (Política Nacional da Leitura e do Livro). Adaptado.",
+      "texto": "A Lei nº 13.696/2018 institui a Política Nacional da Leitura e do Livro (PNLL) como uma estratégia permanente para promover o livro, a leitura, a escrita e as bibliotecas no Brasil. Dentre suas diretrizes principais, destacam-se a garantia do acesso universal aos livros, o fortalecimento e a modernização de bibliotecas públicas e comunitárias, o apoio à produção editorial diversificada e a valorização da leitura como vetor de desenvolvimento social."
+    },
+    {
+      "titulo": "Texto IV — Barreiras econômicas e territoriais",
+      "fonte": "Adaptado de matérias sobre mercado editorial e acesso à cultura no Brasil, 2023.",
+      "texto": "O acesso ao livro no Brasil enfrenta profundas desigualdades econômicas e geográficas. O custo médio dos exemplares físicos compromete uma parcela expressiva do orçamento de famílias de menor renda. Paralelamente, livrarias e espaços de mediação cultural concentram-se predominantemente nos grandes centros urbanos, deixando periferias e municípios do interior desprovidos de infraestrutura adequada para a formação de novos leitores."
+    }
+  ],
+  "created_at": "2026-10-01T15:04:36.195831+00:00"
+}

@@ -1,0 +1,20 @@
+{
+  "eixo": "Cidadania e direitos",
+  "tema": "Desafios para ampliar o acesso à cultura no Brasil",
+  "textos_motivadores": [
+    {
+      "titulo": "Texto I — Contextualização",
+      "fonte": "Nome da fonte, ano",
+      "texto": "Escreva aqui o texto motivador. Você pode incluir uma imagem neste mesmo objeto.",
+      "imagem": {
+        "arquivo": "imagem-texto-I.png",
+        "alt": "Descrição breve da imagem"
+      }
+    },
+    {
+      "titulo": "Texto II — Opcional",
+      "fonte": "",
+      "texto": "Adicione outros textos motivadores. A imagem é opcional."
+    }
+  ]
+}

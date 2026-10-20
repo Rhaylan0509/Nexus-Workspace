@@ -10,6 +10,7 @@ import {
   RefreshCw,
   LogOut,
   CalendarDays,
+  PenLine,
 } from 'lucide-react';
 import { FileItem, FilterCategory } from '../types';
 import { formatBytes } from '../lib/storage';
@@ -23,6 +24,8 @@ interface SidebarProps {
   onSelectCategory: (category: FilterCategory) => void;
   onNavigateToFolder: (folderId: string | null) => void;
   onOpenCalendar: () => void;
+  onOpenEssays: () => void;
+  isEssaysView: boolean;
   isCalendarView: boolean;
   onOpenProductivityDrawer: () => void;
   isOpenMobile: boolean;
@@ -45,6 +48,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectCategory,
   onNavigateToFolder,
   onOpenCalendar,
+  onOpenEssays,
+  isEssaysView,
   isCalendarView,
   onOpenProductivityDrawer,
   isOpenMobile,
@@ -116,6 +121,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               {activeItems.length}
             </span>
+          </button>
+
+          <button
+            onClick={() => {
+              onOpenEssays();
+              if (isOpenMobile) onCloseMobile();
+            }}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${isEssaysView ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'}`}
+          >
+            <PenLine className={`w-4 h-4 ${isEssaysView ? 'text-orange-200' : 'text-orange-600'}`} />
+            <span>Redação</span>
           </button>
 
           {/* Favoritos */}

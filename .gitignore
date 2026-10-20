@@ -12,3 +12,6 @@ bridge/credentials.json
 bridge/token.json
 bridge/.venv/
 bridge/__pycache__/
+
+# Runtime data for the integrated writing app
+public/redacao/essays.sqlite3

@@ -102,8 +102,11 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
 
     let url: string | null = null;
 
-    if (item.blobKey) {
-      getBlob(item.blobKey).then(async (loadedBlob) => {
+    if (item.blobKey || item.metadata?.githubUrl) {
+      (item.blobKey ? getBlob(item.blobKey) : fetch(item.metadata!.githubUrl!).then((response) => {
+        if (!response.ok) throw new Error(`GitHub respondeu ${response.status}`);
+        return response.blob();
+      })).then(async (loadedBlob) => {
         if (loadedBlob) {
           setBlob(loadedBlob);
           url = URL.createObjectURL(loadedBlob);
@@ -131,7 +134,7 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
             setIsParsingXopp(false);
           }
         }
-      });
+      }).catch((error) => console.error('Falha ao carregar arquivo do acervo GitHub:', error));
     } else if (isXopp) {
       setIsParsingXopp(true);
       const paper = item.description || item.metadata?.paperFormat || 'A5 · Amarelo claro · Pontilhado';
@@ -313,8 +316,10 @@ export const ItemPreviewModal: React.FC<ItemPreviewModalProps> = ({
       return;
     }
 
-    if (item.blobKey) {
-      const loadedBlob = await getBlob(item.blobKey);
+    if (item.blobKey || item.metadata?.githubUrl) {
+      const loadedBlob = item.blobKey
+        ? await getBlob(item.blobKey)
+        : await fetch(item.metadata!.githubUrl!).then((response) => response.ok ? response.blob() : null);
       if (loadedBlob) {
         triggerFileDownload(loadedBlob, item.name);
         return;

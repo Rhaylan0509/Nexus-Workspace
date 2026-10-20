@@ -98,6 +98,54 @@ export default function App() {
     return INITIAL_FILES; // starts at empty array []
   });
 
+  // The committed library index is the source of truth for the shared archive.
+  useEffect(() => {
+    const rawBase = import.meta.env.VITE_GITHUB_DATA_BASE || 'https://raw.githubusercontent.com/Rhaylan0509/Nexus-Workspace/main/data';
+    let cancelled = false;
+    fetch(`${rawBase}/library.json`, { cache: 'no-cache' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`GitHub respondeu ${response.status}`);
+        return response.json();
+      })
+      .then((library) => {
+        if (cancelled || !Array.isArray(library.entries)) return;
+        const remoteItems: FileItem[] = library.entries.map((entry: any) => {
+          const storedPath = entry.filePath || entry.storagePath || '';
+          const relativePath = storedPath.split(/data[\\/]/i).pop()?.replace(/\\/g, '/') || '';
+          const extension = (entry.extension || relativePath.split('.').pop() || '').replace(/^\./, '').toLowerCase();
+          const isFolder = entry.type === 'folder' || entry.type === 'notebook';
+          const githubUrl = !isFolder && relativePath
+            ? `${rawBase}/${relativePath.split('/').map(encodeURIComponent).join('/')}`
+            : undefined;
+          return {
+            id: entry.id,
+            name: entry.name,
+            type: isFolder ? entry.type : 'file',
+            parentId: entry.parentId || null,
+            createdAt: Date.parse(entry.createdAt || '') || Date.now(),
+            updatedAt: Number(entry.updatedAt) || Date.parse(entry.createdAt || '') || Date.now(),
+            size: Number(entry.fileSize) || undefined,
+            mimeType: extension === 'pdf' ? 'application/pdf' : extension === 'xopp' || extension === 'xoj' ? 'application/octet-stream' : undefined,
+            extension,
+            tags: [], starred: false, trashed: false,
+            description: entry.size || entry.style ? `${entry.size || ''} ${entry.style || ''}`.trim() : undefined,
+            metadata: { source: 'github', ...(githubUrl ? { githubUrl } : {}) },
+          };
+        });
+        setItems((current) => {
+          const remoteIds = new Set(remoteItems.map((item) => item.id));
+          const localById = new Map(current.map((item) => [item.id, item]));
+          const sharedLibrary = remoteItems.map((item) => {
+            const local = localById.get(item.id);
+            return local ? { ...item, ...local, metadata: { ...local.metadata, ...item.metadata } } : item;
+          });
+          return [...sharedLibrary, ...current.filter((item) => !remoteIds.has(item.id))];
+        });
+      })
+      .catch((error) => console.warn('Não foi possível carregar o acervo do GitHub:', error));
+    return () => { cancelled = true; };
+  }, []);
+
   // Quick links state
   const [quickLinks, setQuickLinks] = useState<QuickLink[]>(() => {
     try {
@@ -178,6 +226,7 @@ export default function App() {
   const [isProductivityDrawerOpen, setIsProductivityDrawerOpen] = useState(false);
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false);
   const [isCalendarView, setIsCalendarView] = useState(false);
+  const [isEssaysView, setIsEssaysView] = useState(false);
   const [googleCalendarToken, setGoogleCalendarToken] = useState<string | null>(null);
   const [confirmModalState, setConfirmModalState] = useState<{
     isOpen: boolean;
@@ -300,6 +349,7 @@ export default function App() {
   // Handlers for Navigation
   const handleNavigateToFolder = (folderId: string | null) => {
     setIsCalendarView(false);
+    setIsEssaysView(false);
     setCurrentCategory('all');
     setCurrentFolderId(folderId);
     setSearchQuery('');
@@ -315,6 +365,7 @@ export default function App() {
 
   const handleSelectCategory = (category: FilterCategory) => {
     setIsCalendarView(false);
+    setIsEssaysView(false);
     setCurrentCategory(category);
     if (category !== 'all') {
       setCurrentFolderId(null);
@@ -335,9 +386,12 @@ export default function App() {
           setItems((current) => mergeWorkspaceWithGoogleDrive(current, driveItems));
           setSyncStatusMessage('Arquivos carregados do Google Drive.');
         } else {
-          const localOnlyItems = items.filter((item) => !item.driveFileId);
+          const localOnlyItems = items.filter((item) => !item.driveFileId && item.metadata?.source !== 'github');
           const driveIds = await syncAllItemsToGoogleDrive(res.accessToken, localOnlyItems);
-          setItems(localOnlyItems.map((item) => driveIds[item.id] ? { ...item, driveFileId: driveIds[item.id] } : item));
+          const linkedLocalItems = localOnlyItems.map((item) => driveIds[item.id] ? { ...item, driveFileId: driveIds[item.id] } : item);
+          const githubItems = items.filter((item) => item.metadata?.source === 'github');
+          const previouslyLinkedItems = items.filter((item) => item.driveFileId && item.metadata?.source !== 'github');
+          setItems([...githubItems, ...previouslyLinkedItems, ...linkedLocalItems]);
           setSyncStatusMessage('Biblioteca enviada ao Google Drive.');
         }
         setTimeout(() => setSyncStatusMessage(null), 3000);
@@ -384,7 +438,7 @@ export default function App() {
 
     try {
       let sourceItems = items;
-      for (const item of sourceItems.filter((candidate) => candidate.driveFileId && candidate.trashed !== Boolean(candidate.metadata?.driveTrashed))) {
+      for (const item of sourceItems.filter((candidate) => candidate.metadata?.source !== 'github' && candidate.driveFileId && candidate.trashed !== Boolean(candidate.metadata?.driveTrashed))) {
         await updateDriveFileMetadata(token, item.driveFileId!, { trashed: item.trashed });
         sourceItems = sourceItems.map((candidate) => candidate.id === item.id
           ? { ...candidate, metadata: { ...candidate.metadata, driveTrashed: candidate.trashed } }
@@ -393,7 +447,8 @@ export default function App() {
       setSyncStatusMessage('Lendo a versão atual do Google Drive...');
       const driveItems = await loadWorkspaceFromGoogleDrive(token);
       let itemsToSync = mergeWorkspaceWithGoogleDrive(sourceItems, driveItems);
-      const driveIds = await syncAllItemsToGoogleDrive(token, itemsToSync, (curr, tot, name) => {
+      const driveSyncItems = itemsToSync.filter((item) => item.metadata?.source !== 'github');
+      const driveIds = await syncAllItemsToGoogleDrive(token, driveSyncItems, (curr, tot, name) => {
         setSyncStatusMessage(`Sincronizando ${curr}/${tot}: ${name}`);
       });
       itemsToSync = itemsToSync.map((item) => driveIds[item.id]
@@ -446,8 +501,8 @@ export default function App() {
       confirmLabel: 'Limpar Tudo',
       isDestructive: true,
       onConfirm: () => {
-        setItems([]);
-        localStorage.removeItem(STORAGE_KEY_ITEMS);
+        setItems((current) => current.filter((item) => item.metadata?.source === 'github'));
+        localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items.filter((item) => item.metadata?.source === 'github')));
         localStorage.removeItem('nexus_file_items_v5');
         localStorage.removeItem('nexus_file_items_v4');
         setPreviewItem(null);
@@ -767,8 +822,10 @@ export default function App() {
           currentFolderId={currentFolderId}
           onSelectCategory={handleSelectCategory}
           onNavigateToFolder={handleNavigateToFolder}
-          onOpenCalendar={() => setIsCalendarView(true)}
+          onOpenCalendar={() => { setIsEssaysView(false); setIsCalendarView(true); }}
           isCalendarView={isCalendarView}
+          onOpenEssays={() => { setIsCalendarView(false); setIsEssaysView(true); }}
+          isEssaysView={isEssaysView}
           onOpenProductivityDrawer={() => setIsProductivityDrawerOpen(true)}
           isOpenMobile={isSidebarMobileOpen}
           onCloseMobile={() => setIsSidebarMobileOpen(false)}
@@ -784,14 +841,14 @@ export default function App() {
 
         {/* Workspace Main Viewport */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-          <div className={isCalendarView ? 'block' : 'hidden'}>
+          <div className={isCalendarView && !isEssaysView ? 'block' : 'hidden'}>
             <CalendarPanel
               accessToken={googleCalendarToken}
               onConnectGoogleCalendar={handleConnectGoogleCalendar}
               onCalendarTokenExpired={handleCalendarTokenExpired}
             />
           </div>
-          <div className={isCalendarView ? 'hidden' : 'block'}>
+          <div className={!isCalendarView && !isEssaysView ? 'block' : 'hidden'}>
           {/* Breadcrumbs Navigation with clickable hierarchy trail */}
           <Breadcrumbs
             breadcrumbs={breadcrumbs}
@@ -859,6 +916,9 @@ export default function App() {
                 <span>Esvaziar Lixeira</span>
               </button>
             )}
+          </div>
+          <div className={isEssaysView ? 'block min-h-[calc(100vh-8rem)]' : 'hidden'}>
+            <iframe title="Corrija pra mim — redação" src="/redacao/index.html" className="w-full min-h-[calc(100vh-8rem)] border-0 rounded-2xl bg-[#fbf8f5]" />
           </div>
 
           {/* Explorer Toolbar: Search, Filters, View Modes, Sorting, New */}
