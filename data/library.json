@@ -990,6 +990,27 @@
       "fileSize": 17552834,
       "createdAt": "2026-10-21T12:14:10.616Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\História-f8f10578\\historia-geral-semana-3.pdf"
+    },
+    {
+      "id": "545f8ca4-5fd3-4e32-9fa3-e3f823433e6e",
+      "type": "folder",
+      "name": "Anotações temporárias",
+      "parentId": null,
+      "createdAt": "2026-10-21T13:12:28.074Z",
+      "color": "green",
+      "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Anotações temporárias-545f8ca4"
+    },
+    {
+      "id": "dc3511ef-f245-46bb-8e1e-501eccb1092f",
+      "type": "note",
+      "name": "Trabalho de geisa",
+      "parentId": "545f8ca4-5fd3-4e32-9fa3-e3f823433e6e",
+      "createdAt": "2026-10-21T13:12:41.809Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Anotações temporárias-545f8ca4\\Trabalho de geisa.xopp",
+      "extension": ".xopp"
     }
   ]
 }
