@@ -979,6 +979,17 @@
       "fileSize": 36556724,
       "createdAt": "2026-10-20T23:24:54.676Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Simulado-2e1ad1ea\\Simulado 01 - Dia 1 - Humanas.pdf"
+    },
+    {
+      "id": "5c7e43e3-ccbc-4ec8-845e-3563374efa5f",
+      "type": "note",
+      "name": "historia-geral-semana-3",
+      "extension": ".pdf",
+      "parentId": "f8f10578-56e5-479d-a45c-095806fad282",
+      "imported": true,
+      "fileSize": 17552834,
+      "createdAt": "2026-10-21T12:14:10.616Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\História-f8f10578\\historia-geral-semana-3.pdf"
     }
   ]
 }
