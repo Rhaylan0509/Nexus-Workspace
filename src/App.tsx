@@ -47,6 +47,7 @@ import { MoveItemModal } from './components/MoveItemModal';
 import { ProductivityHubDrawer } from './components/ProductivityHubDrawer';
 import { ConfirmModal } from './components/ConfirmModal';
 import { CalendarPanel } from './components/CalendarPanel';
+import { QuestionsWorkspace } from './components/QuestionsWorkspace';
 import { User } from 'firebase/auth';
 import {
   initAuth,
@@ -227,6 +228,8 @@ export default function App() {
   const [isSidebarMobileOpen, setIsSidebarMobileOpen] = useState(false);
   const [isCalendarView, setIsCalendarView] = useState(false);
   const [isEssaysView, setIsEssaysView] = useState(false);
+  const [isRepertoireView, setIsRepertoireView] = useState(false);
+  const [isQuestionsView, setIsQuestionsView] = useState(false);
   const [googleCalendarToken, setGoogleCalendarToken] = useState<string | null>(null);
   const [confirmModalState, setConfirmModalState] = useState<{
     isOpen: boolean;
@@ -350,6 +353,8 @@ export default function App() {
   const handleNavigateToFolder = (folderId: string | null) => {
     setIsCalendarView(false);
     setIsEssaysView(false);
+    setIsRepertoireView(false);
+    setIsQuestionsView(false);
     setCurrentCategory('all');
     setCurrentFolderId(folderId);
     setSearchQuery('');
@@ -366,6 +371,8 @@ export default function App() {
   const handleSelectCategory = (category: FilterCategory) => {
     setIsCalendarView(false);
     setIsEssaysView(false);
+    setIsRepertoireView(false);
+    setIsQuestionsView(false);
     setCurrentCategory(category);
     if (category !== 'all') {
       setCurrentFolderId(null);
@@ -822,10 +829,14 @@ export default function App() {
           currentFolderId={currentFolderId}
           onSelectCategory={handleSelectCategory}
           onNavigateToFolder={handleNavigateToFolder}
-          onOpenCalendar={() => { setIsEssaysView(false); setIsCalendarView(true); }}
+          onOpenCalendar={() => { setIsEssaysView(false); setIsRepertoireView(false); setIsQuestionsView(false); setIsCalendarView(true); }}
           isCalendarView={isCalendarView}
-          onOpenEssays={() => { setIsCalendarView(false); setIsEssaysView(true); }}
+          onOpenEssays={() => { setIsCalendarView(false); setIsRepertoireView(false); setIsQuestionsView(false); setIsEssaysView(true); }}
           isEssaysView={isEssaysView}
+          onOpenRepertoire={() => { setIsCalendarView(false); setIsEssaysView(false); setIsQuestionsView(false); setIsRepertoireView(true); }}
+          isRepertoireView={isRepertoireView}
+          onOpenQuestions={() => { setIsCalendarView(false); setIsEssaysView(false); setIsRepertoireView(false); setIsQuestionsView(true); }}
+          isQuestionsView={isQuestionsView}
           onOpenProductivityDrawer={() => setIsProductivityDrawerOpen(true)}
           isOpenMobile={isSidebarMobileOpen}
           onCloseMobile={() => setIsSidebarMobileOpen(false)}
@@ -841,14 +852,14 @@ export default function App() {
 
         {/* Workspace Main Viewport */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-          <div className={isCalendarView && !isEssaysView ? 'block' : 'hidden'}>
+          <div className={isCalendarView && !isEssaysView && !isRepertoireView && !isQuestionsView ? 'block' : 'hidden'}>
             <CalendarPanel
               accessToken={googleCalendarToken}
               onConnectGoogleCalendar={handleConnectGoogleCalendar}
               onCalendarTokenExpired={handleCalendarTokenExpired}
             />
           </div>
-          <div className={!isCalendarView && !isEssaysView ? 'block' : 'hidden'}>
+          <div className={!isCalendarView && !isEssaysView && !isRepertoireView && !isQuestionsView ? 'block' : 'hidden'}>
           {/* Breadcrumbs Navigation with clickable hierarchy trail */}
           <Breadcrumbs
             breadcrumbs={breadcrumbs}
@@ -917,10 +928,6 @@ export default function App() {
               </button>
             )}
           </div>
-          <div className={isEssaysView ? 'block min-h-[calc(100vh-8rem)]' : 'hidden'}>
-            <iframe title="Corrija pra mim — redação" src="/redacao/index.html" className="w-full min-h-[calc(100vh-8rem)] border-0 rounded-2xl bg-[#fbf8f5]" />
-          </div>
-
           {/* Explorer Toolbar: Search, Filters, View Modes, Sorting, New */}
           <ExplorerToolbar
             searchQuery={searchQuery}
@@ -1099,6 +1106,15 @@ export default function App() {
               />
             )}
           </div>
+          </div>
+          <div className={isEssaysView ? 'block min-h-[calc(100vh-8rem)]' : 'hidden'}>
+            <iframe title="Corrija pra mim — redação" src="/redacao/index.html" className="w-full min-h-[calc(100vh-8rem)] border-0 rounded-2xl bg-[#fbf8f5]" />
+          </div>
+          <div className={isRepertoireView ? 'block min-h-[calc(100vh-8rem)]' : 'hidden'}>
+            <iframe title="Repertório para redação" src="/redacao/index.html?page=repertoire" className="w-full min-h-[calc(100vh-8rem)] border-0 rounded-2xl bg-white" />
+          </div>
+          <div className={isQuestionsView ? 'block' : 'hidden'}>
+            <QuestionsWorkspace />
           </div>
         </main>
       </div>

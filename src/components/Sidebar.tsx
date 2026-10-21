@@ -11,6 +11,8 @@ import {
   LogOut,
   CalendarDays,
   PenLine,
+  BookOpen,
+  ClipboardList,
 } from 'lucide-react';
 import { FileItem, FilterCategory } from '../types';
 import { formatBytes } from '../lib/storage';
@@ -26,6 +28,10 @@ interface SidebarProps {
   onOpenCalendar: () => void;
   onOpenEssays: () => void;
   isEssaysView: boolean;
+  onOpenRepertoire: () => void;
+  isRepertoireView: boolean;
+  onOpenQuestions: () => void;
+  isQuestionsView: boolean;
   isCalendarView: boolean;
   onOpenProductivityDrawer: () => void;
   isOpenMobile: boolean;
@@ -50,6 +56,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenCalendar,
   onOpenEssays,
   isEssaysView,
+  onOpenRepertoire,
+  isRepertoireView,
+  onOpenQuestions,
+  isQuestionsView,
   isCalendarView,
   onOpenProductivityDrawer,
   isOpenMobile,
@@ -121,6 +131,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               {activeItems.length}
             </span>
+          </button>
+
+          <button
+            onClick={() => { onOpenRepertoire(); if (isOpenMobile) onCloseMobile(); }}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${isRepertoireView ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'}`}
+          >
+            <BookOpen className={`w-4 h-4 ${isRepertoireView ? 'text-amber-200' : 'text-amber-600'}`} />
+            <span>Repertório</span>
+          </button>
+
+          <button
+            onClick={() => { onOpenQuestions(); if (isOpenMobile) onCloseMobile(); }}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${isQuestionsView ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'}`}
+          >
+            <ClipboardList className={`w-4 h-4 ${isQuestionsView ? 'text-sky-200' : 'text-sky-600'}`} />
+            <span>Caderno de questões</span>
           </button>
 
           <button
