@@ -1022,6 +1022,28 @@
       "fileSize": 1225146,
       "createdAt": "2026-10-21T23:55:45.308Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Anotações temporárias-545f8ca4\\Simulado_Termoquímica,_Cinética,_Equilíbrio_Químico-Química.pdf"
+    },
+    {
+      "id": "25dd2dca-5d47-46bb-b3c8-23e312d36b56",
+      "type": "note",
+      "name": "Semana-2",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 4103471,
+      "createdAt": "2026-10-22T12:01:41.306Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Semana-2.pdf"
+    },
+    {
+      "id": "d6e1ed9d-a43f-4092-b718-424ea13a7d74",
+      "type": "note",
+      "name": "Semana-3",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 2018245,
+      "createdAt": "2026-10-22T12:01:41.345Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Semana-3.pdf"
     }
   ]
 }
