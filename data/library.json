@@ -1044,6 +1044,17 @@
       "fileSize": 2018245,
       "createdAt": "2026-10-22T12:01:41.345Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Semana-3.pdf"
+    },
+    {
+      "id": "5e0a2273-ac3d-4342-8fbf-7ff80c7ce179",
+      "type": "note",
+      "name": "Biologia-Fisiologia_Animal-Detalhado",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 2012590,
+      "createdAt": "2026-10-22T13:09:09.043Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Fisiologia_Animal-Detalhado.pdf"
     }
   ]
 }
