@@ -1055,6 +1055,18 @@
       "fileSize": 2012590,
       "createdAt": "2026-10-22T13:09:09.043Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Fisiologia_Animal-Detalhado.pdf"
+    },
+    {
+      "id": "ef29ffc9-7f96-4f4c-87bc-5bf9cf0bf0bd",
+      "type": "note",
+      "name": "Caximira",
+      "parentId": "fb5f06be-ba38-4aa0-a3b3-455b48b6fd76",
+      "createdAt": "2026-10-24T14:35:47.412Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Atualidades-fb5f06be\\Caximira.xopp",
+      "extension": ".xopp"
     }
   ]
 }
