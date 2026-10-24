@@ -1091,6 +1091,26 @@
       "createdAt": "2026-10-24T18:53:22.769Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Hidrostática.pdf",
       "updatedAt": 1792868012360
+    },
+    {
+      "id": "062fe02c-9b1e-4fe5-911f-79151ce46d86",
+      "type": "notebook",
+      "name": "Geografia",
+      "parentId": "dfd88118-99ee-4d01-825f-9a526d6b39f8",
+      "createdAt": "2026-10-24T20:42:17.065Z",
+      "color": "orange",
+      "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c"
+    },
+    {
+      "id": "df753ac3-6241-49f8-bc74-a0c72c14c3e0",
+      "type": "note",
+      "name": "revisao-final-geografia-semana-1",
+      "extension": ".pdf",
+      "parentId": "062fe02c-9b1e-4fe5-911f-79151ce46d86",
+      "imported": true,
+      "fileSize": 31208485,
+      "createdAt": "2026-10-24T20:42:29.955Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\revisao-final-geografia-semana-1.pdf"
     }
   ]
 }
