@@ -1079,6 +1079,18 @@
       "createdAt": "2026-10-24T18:00:20.402Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Revisão-Semana2.pdf",
       "updatedAt": 1792864843571
+    },
+    {
+      "id": "a2d13ba2-d64e-4ce3-8d56-96411e920ae1",
+      "type": "note",
+      "name": "Hidrostática",
+      "extension": ".pdf",
+      "parentId": "3b1e5770-d8e6-4ea2-bc0f-649d9c46c39e",
+      "imported": true,
+      "fileSize": 699372,
+      "createdAt": "2026-10-24T18:53:22.769Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Hidrostática.pdf",
+      "updatedAt": 1792868012360
     }
   ]
 }
