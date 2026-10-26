@@ -1111,6 +1111,18 @@
       "fileSize": 31208485,
       "createdAt": "2026-10-24T20:42:29.955Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\revisao-final-geografia-semana-1.pdf"
+    },
+    {
+      "id": "96edd9c4-7a17-45f5-bf91-63284c58bfdc",
+      "type": "note",
+      "name": "Química-Semana4",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 2774522,
+      "createdAt": "2026-10-26T12:18:06.408Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Química-Semana4.pdf",
+      "updatedAt": 1793017205330
     }
   ]
 }
