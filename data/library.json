@@ -1135,6 +1135,18 @@
       "createdAt": "2026-10-26T13:19:22.345Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Nomenclatura-QO.pdf",
       "updatedAt": 1793020779488
+    },
+    {
+      "id": "ebac0df0-624b-41ba-91e9-065ee1873743",
+      "type": "note",
+      "name": "Física_Semana_3",
+      "extension": ".pdf",
+      "parentId": "3b1e5770-d8e6-4ea2-bc0f-649d9c46c39e",
+      "imported": true,
+      "fileSize": 5859622,
+      "createdAt": "2026-10-28T18:55:50.229Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Física_Semana_3.pdf",
+      "updatedAt": 1793213763909
     }
   ]
 }
