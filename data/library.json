@@ -1147,6 +1147,18 @@
       "createdAt": "2026-10-28T18:55:50.229Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Física_Semana_3.pdf",
       "updatedAt": 1793213763909
+    },
+    {
+      "id": "f957adcd-d0eb-455f-b6a1-e65f253d673e",
+      "type": "note",
+      "name": "Repertórios",
+      "parentId": "64c55bc8-ee91-481a-8b77-4b238bb4e413",
+      "createdAt": "2026-10-28T20:21:20.049Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Redação-64c55bc8\\Repertórios.xopp",
+      "extension": ".xopp"
     }
   ]
 }
