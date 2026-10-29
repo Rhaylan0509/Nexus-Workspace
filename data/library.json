@@ -1171,6 +1171,17 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Atualidades-fb5f06be\\Oriente médio.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "883e769f-41c6-404c-9758-13783cb5bd2a",
+      "type": "note",
+      "name": "biologia-semana-4",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 13686764,
+      "createdAt": "2026-10-29T12:07:52.954Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\biologia-semana-4.pdf"
     }
   ]
 }
