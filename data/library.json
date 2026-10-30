@@ -1182,6 +1182,17 @@
       "fileSize": 13686764,
       "createdAt": "2026-10-29T12:07:52.954Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\biologia-semana-4.pdf"
+    },
+    {
+      "id": "dbaa75c0-9b5f-4735-bedf-acc472898e4f",
+      "type": "note",
+      "name": "Reações_Orgânicas-Roteiro_da_aula",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 114412,
+      "createdAt": "2026-10-30T21:41:26.190Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Reações_Orgânicas-Roteiro_da_aula.pdf"
     }
   ]
 }
