@@ -1193,6 +1193,26 @@
       "fileSize": 114412,
       "createdAt": "2026-10-30T21:41:26.190Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Reações_Orgânicas-Roteiro_da_aula.pdf"
+    },
+    {
+      "id": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "type": "folder",
+      "name": "Maratona Enem",
+      "parentId": null,
+      "createdAt": "2026-11-02T22:03:39.265Z",
+      "color": "purple",
+      "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917"
+    },
+    {
+      "id": "3cc1f86e-5fd2-4a35-9860-54073411d2f0",
+      "type": "note",
+      "name": "EBOOK SEMANA 1 - MARATONA ENEM",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 21722320,
+      "createdAt": "2026-11-02T22:03:49.409Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 1 - MARATONA ENEM.pdf"
     }
   ]
 }
