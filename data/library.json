@@ -1234,6 +1234,17 @@
       "createdAt": "2026-11-03T12:03:53.933Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Inglês-324254a5\\Inglês-Roteiro.pdf",
       "updatedAt": 1793707446010
+    },
+    {
+      "id": "ca2c2517-4646-4ef0-b411-0130f1699819",
+      "type": "note",
+      "name": "Ingles-Questões",
+      "extension": ".pdf",
+      "parentId": "324254a5-be09-48cb-b57d-55be38e74a63",
+      "imported": true,
+      "fileSize": 17781319,
+      "createdAt": "2026-11-03T12:49:47.039Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Inglês-324254a5\\Ingles-Questões.pdf"
     }
   ]
 }
