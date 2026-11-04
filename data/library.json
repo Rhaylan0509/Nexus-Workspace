@@ -1256,6 +1256,17 @@
       "fileSize": 6971839,
       "createdAt": "2026-11-03T23:34:37.347Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 1 - dia 2.pdf"
+    },
+    {
+      "id": "2657362d-5eaf-43b4-aa76-f6401a58ee4f",
+      "type": "note",
+      "name": "EBOOK SEMANA 1 - Dia 3",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 1049499,
+      "createdAt": "2026-11-04T23:39:48.765Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 1 - Dia 3.pdf"
     }
   ]
 }
