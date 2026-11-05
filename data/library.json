@@ -1270,6 +1270,18 @@
       "createdAt": "2026-11-04T23:39:48.765Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 1 - Dia 3.pdf",
       "updatedAt": 1793882266490
+    },
+    {
+      "id": "c14d9bc4-7c74-4fb7-90a2-650905ec0658",
+      "type": "note",
+      "name": "Globalização",
+      "parentId": "062fe02c-9b1e-4fe5-911f-79151ce46d86",
+      "createdAt": "2026-11-05T23:31:23.909Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\Globalização.xopp",
+      "extension": ".xopp"
     }
   ]
 }
