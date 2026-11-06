@@ -1293,6 +1293,18 @@
       "fileSize": 1045576,
       "createdAt": "2026-11-05T23:35:20.022Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\Aula 3- Lista.pdf"
+    },
+    {
+      "id": "05d7a54d-02e8-4cb9-9715-12eed7f0463e",
+      "type": "note",
+      "name": "Geografia Agrária- Lista",
+      "extension": ".pdf",
+      "parentId": "062fe02c-9b1e-4fe5-911f-79151ce46d86",
+      "imported": true,
+      "fileSize": 4105312,
+      "createdAt": "2026-11-06T12:48:21.474Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\Geografia Agrária- Lista.pdf",
+      "updatedAt": 1793969323517
     }
   ]
 }
