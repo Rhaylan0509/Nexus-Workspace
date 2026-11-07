@@ -1316,6 +1316,18 @@
       "fileSize": 26323649,
       "createdAt": "2026-11-06T12:56:49.439Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Geografia-062fe02c\\revisao-final-geografia-semana-3.pdf"
+    },
+    {
+      "id": "f488cfdc-0b03-408d-8ff8-c0e893d92be7",
+      "type": "note",
+      "name": "Meta",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "createdAt": "2026-11-07T13:09:10.151Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Meta.xopp",
+      "extension": ".xopp"
     }
   ]
 }
