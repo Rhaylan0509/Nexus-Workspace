@@ -1339,6 +1339,18 @@
       "fileSize": 22350899,
       "createdAt": "2026-11-07T13:25:43.427Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\revisao-final-historia-do-brasil-semana-4.pdf"
+    },
+    {
+      "id": "97a73fb0-95a1-46c6-a9da-63d5c3559aa3",
+      "type": "note",
+      "name": "Repertórios",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "createdAt": "2026-11-07T23:08:07.467Z",
+      "size": "A4",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Repertórios.xopp",
+      "extension": ".xopp"
     }
   ]
 }
