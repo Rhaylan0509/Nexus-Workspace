@@ -1328,6 +1328,17 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Meta.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "6ef820ea-9c08-44b5-9b2e-4b1f789ec771",
+      "type": "note",
+      "name": "revisao-final-historia-do-brasil-semana-4",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 22350899,
+      "createdAt": "2026-11-07T13:25:43.427Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\revisao-final-historia-do-brasil-semana-4.pdf"
     }
   ]
 }
