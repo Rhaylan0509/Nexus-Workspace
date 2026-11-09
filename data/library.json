@@ -1351,6 +1351,17 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Repertórios.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "ac6bbd7a-c60f-4a65-89e0-088ac417e4d5",
+      "type": "note",
+      "name": "EBOOK SEMANA 2 - matemática",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 928122,
+      "createdAt": "2026-11-09T22:11:03.438Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 2 - matemática.pdf"
     }
   ]
 }
