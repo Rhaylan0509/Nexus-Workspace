@@ -1374,6 +1374,17 @@
       "createdAt": "2026-11-10T11:59:47.475Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Ecologia.pdf",
       "updatedAt": 1794312044853
+    },
+    {
+      "id": "9fa7c423-4525-4ce5-9fea-df6a00924f59",
+      "type": "note",
+      "name": "EBOOK SEMANA 2 - dia 2",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 2192269,
+      "createdAt": "2026-11-10T22:57:46.372Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 2 - dia 2.pdf"
     }
   ]
 }
