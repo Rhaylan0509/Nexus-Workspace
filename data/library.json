@@ -1362,6 +1362,18 @@
       "fileSize": 928122,
       "createdAt": "2026-11-09T22:11:03.438Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 2 - matemática.pdf"
+    },
+    {
+      "id": "e5a0dd36-4584-41c8-955e-db0c826f9b2c",
+      "type": "note",
+      "name": "Biologia-Ecologia",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 2711400,
+      "createdAt": "2026-11-10T11:59:47.475Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Ecologia.pdf",
+      "updatedAt": 1794312044853
     }
   ]
 }
