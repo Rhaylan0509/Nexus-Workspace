@@ -1385,6 +1385,17 @@
       "fileSize": 2192269,
       "createdAt": "2026-11-10T22:57:46.372Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\EBOOK SEMANA 2 - dia 2.pdf"
+    },
+    {
+      "id": "51482d70-0e47-4089-bd2b-beab4acd885f",
+      "type": "note",
+      "name": "guia_incidencia_enem_matematica_natureza",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 87189,
+      "createdAt": "2026-11-12T01:25:16.914Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\guia_incidencia_enem_matematica_natureza.pdf"
     }
   ]
 }
