@@ -1418,6 +1418,18 @@
       "fileSize": 736151,
       "createdAt": "2026-11-12T14:59:08.459Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Citologia-Detalhado.pdf"
+    },
+    {
+      "id": "9eec6e9b-24e2-432a-82cc-077afae574db",
+      "type": "note",
+      "name": "Citologia",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "createdAt": "2026-11-12T23:31:05.642Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Citologia.xopp",
+      "extension": ".xopp"
     }
   ]
 }
