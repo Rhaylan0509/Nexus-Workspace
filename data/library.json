@@ -1430,6 +1430,18 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Citologia.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "b9ab1de4-248e-46e4-9eb5-1da39d3f7d6e",
+      "type": "note",
+      "name": "Citologia-pre",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 3958865,
+      "createdAt": "2026-11-12T23:38:00.136Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Citologia-pre.pdf",
+      "updatedAt": 1794526709340
     }
   ]
 }
