@@ -1407,6 +1407,17 @@
       "fileSize": 536714,
       "createdAt": "2026-11-12T14:09:57.041Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Simulado_Química_Básica,_Química_Ambiental,_Radioatividade-Química.pdf"
+    },
+    {
+      "id": "a1e41274-1267-47c3-b306-aee63b9d1904",
+      "type": "note",
+      "name": "Biologia-Citologia-Detalhado",
+      "extension": ".pdf",
+      "parentId": "522a9fed-084a-4383-b3d5-d6a56ccac2b4",
+      "imported": true,
+      "fileSize": 736151,
+      "createdAt": "2026-11-12T14:59:08.459Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Biologia-Citologia-Detalhado.pdf"
     }
   ]
 }
