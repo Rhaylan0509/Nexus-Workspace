@@ -1396,6 +1396,17 @@
       "fileSize": 87189,
       "createdAt": "2026-11-12T01:25:16.914Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\guia_incidencia_enem_matematica_natureza.pdf"
+    },
+    {
+      "id": "258c822a-c39c-4756-a967-0c13206ecd7a",
+      "type": "note",
+      "name": "Simulado_Química_Básica,_Química_Ambiental,_Radioatividade-Química",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 536714,
+      "createdAt": "2026-11-12T14:09:57.041Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Simulado_Química_Básica,_Química_Ambiental,_Radioatividade-Química.pdf"
     }
   ]
 }
