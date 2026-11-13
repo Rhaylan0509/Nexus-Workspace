@@ -1487,6 +1487,17 @@
       "fileSize": 497722,
       "createdAt": "2026-11-13T18:55:54.583Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Termoquímica.pdf"
+    },
+    {
+      "id": "95aff759-b76b-4c86-bcb6-2da916541ef2",
+      "type": "note",
+      "name": "Cinética",
+      "extension": ".pdf",
+      "parentId": "c4887aa1-8fdd-44e5-82b7-f8175f7fe4c3",
+      "imported": true,
+      "fileSize": 925404,
+      "createdAt": "2026-11-13T19:02:04.361Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Cinética.pdf"
     }
   ]
 }
