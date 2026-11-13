@@ -1476,6 +1476,17 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Erros química.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "59164b5d-e716-4437-a4f5-16a9c0c92e0b",
+      "type": "note",
+      "name": "Termoquímica",
+      "extension": ".pdf",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "imported": true,
+      "fileSize": 497722,
+      "createdAt": "2026-11-13T18:55:54.583Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Termoquímica.pdf"
     }
   ]
 }
