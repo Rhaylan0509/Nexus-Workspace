@@ -1453,6 +1453,17 @@
       "fileSize": 2970389,
       "createdAt": "2026-11-13T00:41:28.502Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Física_(Prof._Coelho)-Revisão_final_ENEM_-_Semana_4.pdf"
+    },
+    {
+      "id": "e4e6841a-65c7-4f53-a449-42b60acfa1c0",
+      "type": "note",
+      "name": "termologia-pre",
+      "extension": ".pdf",
+      "parentId": "3b1e5770-d8e6-4ea2-bc0f-649d9c46c39e",
+      "imported": true,
+      "fileSize": 1586760,
+      "createdAt": "2026-11-13T13:25:43.785Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\termologia-pre.pdf"
     }
   ]
 }
