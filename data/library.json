@@ -1498,6 +1498,18 @@
       "fileSize": 925404,
       "createdAt": "2026-11-13T19:02:04.361Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Química-c4887aa1\\Cinética.pdf"
+    },
+    {
+      "id": "8b1cd509-d444-49da-8574-dca9243c0ae0",
+      "type": "note",
+      "name": "Aula exclusiva",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "createdAt": "2026-11-13T22:13:47.201Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Aula exclusiva.xopp",
+      "extension": ".xopp"
     }
   ]
 }
