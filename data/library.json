@@ -1442,6 +1442,17 @@
       "createdAt": "2026-11-12T23:38:00.136Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Biologia-522a9fed\\Citologia-pre.pdf",
       "updatedAt": 1794526709340
+    },
+    {
+      "id": "5727ac3a-5a79-40fb-a252-7e7808b656ea",
+      "type": "note",
+      "name": "Física_(Prof._Coelho)-Revisão_final_ENEM_-_Semana_4",
+      "extension": ".pdf",
+      "parentId": "3b1e5770-d8e6-4ea2-bc0f-649d9c46c39e",
+      "imported": true,
+      "fileSize": 2970389,
+      "createdAt": "2026-11-13T00:41:28.502Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\Física_(Prof._Coelho)-Revisão_final_ENEM_-_Semana_4.pdf"
     }
   ]
 }
