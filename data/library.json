@@ -1464,6 +1464,18 @@
       "fileSize": 1586760,
       "createdAt": "2026-11-13T13:25:43.785Z",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Ferretto-dfd88118\\Física-3b1e5770\\termologia-pre.pdf"
+    },
+    {
+      "id": "493a7ba6-a888-437c-bb98-a79b9a05f85d",
+      "type": "note",
+      "name": "Erros química",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "createdAt": "2026-11-13T15:05:22.130Z",
+      "size": "A4",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Erros química.xopp",
+      "extension": ".xopp"
     }
   ]
 }
