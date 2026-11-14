@@ -1510,6 +1510,18 @@
       "style": "Pontilhado",
       "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\Aula exclusiva.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "a5b7342e-f970-4aa8-aa96-b91e6bd42614",
+      "type": "note",
+      "name": "matemática-resolver",
+      "parentId": "4540f917-5e4e-47e5-b28f-9ea71adef888",
+      "createdAt": "2026-11-14T23:16:48.962Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Maratona Enem-4540f917\\matemática-resolver.xopp",
+      "extension": ".xopp"
     }
   ]
 }
