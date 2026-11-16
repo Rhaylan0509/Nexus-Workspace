@@ -1531,6 +1531,18 @@
       "createdAt": "2026-11-16T18:53:00.398Z",
       "color": "blue",
       "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\PYTHON-39fd9b3f"
+    },
+    {
+      "id": "b849006e-6ee2-4549-bdf4-091d65d25e0b",
+      "type": "note",
+      "name": "Conceitos Básicos",
+      "parentId": "39fd9b3f-69ff-4d5d-84c8-bbcaf3ad4834",
+      "createdAt": "2026-11-16T18:54:02.366Z",
+      "size": "A5",
+      "color": "Amarelo claro",
+      "style": "Pontilhado",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\PYTHON-39fd9b3f\\Conceitos Básicos.xopp",
+      "extension": ".xopp"
     }
   ]
 }
