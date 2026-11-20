@@ -1526,11 +1526,12 @@
     {
       "id": "39fd9b3f-69ff-4d5d-84c8-bbcaf3ad4834",
       "type": "folder",
-      "name": "PYTHON",
+      "name": "Programação",
       "parentId": null,
       "createdAt": "2026-11-16T18:53:00.398Z",
       "color": "blue",
-      "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\PYTHON-39fd9b3f"
+      "storagePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Programação-39fd9b3f",
+      "updatedAt": 1795185240407
     },
     {
       "id": "b849006e-6ee2-4549-bdf4-091d65d25e0b",
@@ -1541,8 +1542,20 @@
       "size": "A5",
       "color": "Amarelo claro",
       "style": "Pontilhado",
-      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\PYTHON-39fd9b3f\\Conceitos Básicos.xopp",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Programação-39fd9b3f\\Conceitos Básicos.xopp",
       "extension": ".xopp"
+    },
+    {
+      "id": "5a7e6bee-0c0f-4eaa-976d-a3e80572d021",
+      "type": "note",
+      "name": "resumo_html",
+      "extension": ".pdf",
+      "parentId": "39fd9b3f-69ff-4d5d-84c8-bbcaf3ad4834",
+      "imported": true,
+      "fileSize": 35025,
+      "createdAt": "2026-11-20T14:34:51.943Z",
+      "filePath": "D:\\PC\\Documents\\área de trabalho\\Nexus-Workspace\\data\\Programação-39fd9b3f\\resumo_html.pdf",
+      "updatedAt": 1795185298529
     }
   ]
 }
